@@ -37,7 +37,7 @@ class FarmersMarketEventUpdate(BaseModel):
 
 class ProductBase(BaseModel):
         name: str
-        vendor_id: int
+        #vendor_id: int
         description: Optional[str] = None
         price_per_unit: float
         unit: str #-- kg, piece, bunch
@@ -56,13 +56,30 @@ class Product(ProductBase):
             from_attributes = True
 
 
+
 class ProductUpdate(BaseModel):
         name: Optional[str] = None
-        vendor_id: int
+        #vendor_id: int
         description: Optional[str] = None
         price_per_unit: Optional[float] = None
         unit: Optional[str] = None #-- kg, piece, bunch
         category: Optional[str] = None
+
+        class Config:
+            from_attributes = True
+
+
+class UserBase(BaseModel):
+        username: str
+        email: str
+        full_name: Optional[str] = None
+        password: str
+        role: str  # vendor, customer, admin
+
+class User(UserBase):
+        id: int
+        created_at: Optional[datetime]  = None
+        updated_at: Optional[datetime] = None
 
         class Config:
             from_attributes = True
