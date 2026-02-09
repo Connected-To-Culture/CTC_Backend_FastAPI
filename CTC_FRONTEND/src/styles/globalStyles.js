@@ -1,0 +1,77 @@
+// Web-based global styles using CSS-in-JS
+export const globalStyles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#fff',
+    fontFamily: 'Arial, sans-serif',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: '10px',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: '12px 20px',
+    borderRadius: '5px',
+    border: 'none',
+    color: '#fff',
+    fontSize: '16px',
+    cursor: 'pointer',
+    display: 'inline-block',
+    textAlign: 'center',
+    textDecoration: 'none',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: '16px',
+  },
+  input: {
+    border: '1px solid #ccc',
+    padding: '10px',
+    borderRadius: '5px',
+    marginBottom: '10px',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  card: {
+    backgroundColor: '#f9f9f9',
+    padding: '15px',
+    borderRadius: '8px',
+    marginBottom: '10px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+  modal: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: '10px',
+    padding: '20px',
+    maxWidth: '500px',
+    width: '90%',
+    maxHeight: '80vh',
+    overflow: 'auto',
+  },
+};
+
+export const colors = {
+  primary: '#007bff',
+  secondary: '#6c757d',
+  success: '#28a745',
+  danger: '#dc3545',
+  warning: '#ffc107',
+  info: '#17a2b8',
+  light: '#f8f9fa',
+  dark: '#343a40',
+};
