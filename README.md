@@ -54,8 +54,10 @@ Considered options:
 
 ### Development Plans
 
-- For now, building only a web app for Summer 2026.
-- Later extend to a mobile app based on response.
+- Building webscreens frontends for Summer 2026.
+- Web frontend using React.
+  = Upon posituve reception of webscreen deployment, move to devlope app based
+- Mobile frontend using React Native.
 - Refer to this [link](https://www.connectedtoculture.org/ctc-market) for other info related to the CTC Market app.
 - Marketplace or e-commerce flow structure
 - API
@@ -80,12 +82,12 @@ Considered options:
 ### Basic Architecture Diagram - Version 1
 
 ```
-Mobile Application
-       |
-    API Gateway
-       |
-    Database
-       |_________________________________________
+Web Application      Mobile Application
+       |                      |
+    API Gateway            API Gateway
+       |                      |
+    Database                 Database
+       |________________________|
        |            |           |               |
     +---+           +---+       +---+           +---+
     | 1 |           | 2 |       | 3 |           | 4 |
