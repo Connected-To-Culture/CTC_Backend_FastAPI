@@ -9,7 +9,10 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types';
 
-type CustomerHomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type CustomerHomeScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Home'
+>;
 
 interface Props {
   navigation: CustomerHomeScreenNavigationProp;
