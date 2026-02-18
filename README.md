@@ -135,3 +135,7 @@ Landing Page
                              |
                           Logout
 ```
+
+### Discusion points
+
+[Google Docs Link](https://docs.google.com/document/d/11tacjdbUPIwXenR4MepCoKVCsYY9mZieamcxto6VMCM/edit?tab=t.0)

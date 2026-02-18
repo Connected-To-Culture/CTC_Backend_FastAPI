@@ -6,8 +6,16 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
 
-const CustomerHomeScreen = ({ navigation }) => {
+type CustomerHomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+
+interface Props {
+  navigation: CustomerHomeScreenNavigationProp;
+}
+
+const CustomerHomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
