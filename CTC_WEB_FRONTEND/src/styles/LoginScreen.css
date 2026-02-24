@@ -1,0 +1,53 @@
+/* Login Screen Styles */
+
+.login-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.login-container .card-header {
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.login-container .card-body {
+  padding: 1.5rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  margin-bottom: 1rem;
+}
+
+/* Transparent input backgrounds on login screen */
+.login-container .form-control {
+  background-color: transparent;
+}
+
+/* Card slogan styles */
+.card-slogan {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-light-secondary);
+  margin: 0.5rem 0 0 0;
+  line-height: 1.4;
+}
+
+/* Toggle Container Styles */
+.login-toggle-container {
+  max-width: 400px;
+}
+
+.toggle-label {
+  font-size: 0.875rem;
+  color: var(--text-light-secondary);
+  margin: 0 0 0 0;
+  text-align: left;
+  font-weight: 500;
+}
