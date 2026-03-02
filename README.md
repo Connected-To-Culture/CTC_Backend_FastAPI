@@ -11,12 +11,18 @@ A community-focused marketplace to life, allowing:
 
 ## Tech Stack
 
-Considered options:
+### Adopted Technologies
 
-- FARM stack (FastAPI, React Native, MongoDB)
-- PERN stack (Postgres, Express, React Native, Node.js)
-- Java Spring Boot & MongoDB
-- Integrated payment systems (Square, Stripe, PayPal, etc.)
+- **Backend**: FastAPI (Python) - Selected for its high performance and simplicity in building APIs.
+- **Web Frontend**: React - Used for building the user interface for the web application.
+- **Mobile Frontend**: React Native - Employed for cross-platform mobile app development.
+- **Database**: MongoDB - Chosen for its flexibility with document-based storage.
+- **Payment Systems**: Integrated options under consideration (Square, Stripe, PayPal, etc.) for secure transactions.
+
+### Considered but Not Adopted
+
+- PERN stack (Postgres, Express, React Native, Node.js) - Evaluated but not selected due to preference for FastAPI and MongoDB.
+- Java Spring Boot & MongoDB - Considered for enterprise features but opted for lighter Python-based stack.
 
 ## Project Description
 
