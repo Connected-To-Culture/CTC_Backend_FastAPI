@@ -11,18 +11,25 @@ A community-focused marketplace to life, allowing:
 
 ## Tech Stack
 
-Considered options:
+### Adopted Technologies
 
-- FARM stack (FastAPI, React Native, MongoDB)
-- PERN stack (Postgres, Express, React Native, Node.js)
-- Java Spring Boot & MongoDB
-- Integrated payment systems (Square, Stripe, PayPal, etc.)
+- **Backend**: FastAPI (Python) - Selected for its high performance and simplicity in building APIs.
+- **Web Frontend**: React - Used for building the user interface for the web application.
+- **Mobile Frontend**: React Native - Employed for cross-platform mobile app development.
+- **Database**: MongoDB - Chosen for its flexibility with document-based storage.
+- **Payment Systems**: Integrated options under consideration (Square, Stripe, PayPal, etc.) for secure transactions.
+
+### Considered but Not Adopted
+
+- PERN stack (Postgres, Express, React Native, Node.js) - Evaluated but not selected due to preference for FastAPI and MongoDB.
+- Java Spring Boot & MongoDB - Considered for enterprise features but opted for lighter Python-based stack.
 
 ## Project Description
 
 ### Architecture
 
-- P2P architecture seems to be a better option to host the web application. Will research better and find what platform fits us regarding the features such as cost-efficiency, scalability and resilience.
+- currently reviewing subscription offers
+  = limit of 500 across the summer event, potentail for an extra 1000. Strongly hopes not to exceed the 500 limit. The 500 is strictly for software expenditure.
 
 ### Geographic Focus and Timeline
 
@@ -47,16 +54,12 @@ Considered options:
   - Sponsoring free food/free food+free delivery for eligible people.
 - No surplus revenue generation through the app; focus on self-developed components instead of 3rd party services.
 
-### Integration with Other Projects
-
-- **Trip Planner**: C2C Trip Planner was built 2 years ago; no plans to integrate with CTC Market.
-- Instead, aesthetic products will be featured alongside grocery items on the market app to potentially attract tourist cash flow.
-
 ### Development Plans
 
 - Building webscreens frontends for Summer 2026.
 - Web frontend using React.
   = Upon posituve reception of webscreen deployment, move to devlope app based
+  = A quasi P2P architecture could be possible at a later date but would require hardware investments
 - Mobile frontend using React Native.
 - Refer to this [link](https://www.connectedtoculture.org/ctc-market) for other info related to the CTC Market app.
 - Marketplace or e-commerce flow structure
@@ -87,7 +90,7 @@ Web Application      Mobile Application
     API Gateway            API Gateway
        |                      |
     Database                 Database
-       |________________________|
+       |________________________|_______________
        |            |           |               |
     +---+           +---+       +---+           +---+
     | 1 |           | 2 |       | 3 |           | 4 |
