@@ -62,6 +62,7 @@ CTC_WEB_FRONTEND/
 
 - Each modal will have a close button on the top right, as well as closing when clicking the cancel button or when clicking off modal.
 - Use [https://www.connectedtoculture.org/](https://www.connectedtoculture.org/) footer as this is an extension of the site for all pages.
+- Establish a testing section in header that uses a switch to toggle between not signed in, customer, vendor, and admin. This will facilitate autheratation for differnt user types during testing
 
 ### Home Screen
 
@@ -518,6 +519,10 @@ Key Steps:
 Visit the DC WIC website: https://www.dcwic.org for WIC vendor resources.
 Contact D.C. SNAP Retailer Services: https://www.dchealth.dc.gov/service/snap for SNAP application details.
 Confirm POS system is compatible with both eWIC and SNAP EBT.
+
+## CSS Reference
+
+For detailed CSS styling guidelines and conversion of CTC Market website styles to CSS equivalents, see [CSS_REFERENCE_CTC_ORG.md](CSS_REFERENCE_CTC_ORG.md).
 
 ## Contributing
 

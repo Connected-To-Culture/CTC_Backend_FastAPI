@@ -2,11 +2,13 @@ export const formatPrice = (price) => {
   return `$${price.toFixed(2)}`;
 };
 
+/*
 export const validateEmail = (email) => {
   const re =
     /^[^\s@]+@(gmail\.com|yahoo\.com|outlook\.com|connectedtoculture\.org)$/;
   return re.test(email);
 };
+*/
 
 export const calculateDistance = (lat1, lon1, lat2, lon2) => {
   // Haversine formula for distance calculation

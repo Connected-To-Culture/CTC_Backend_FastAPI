@@ -3,18 +3,13 @@ import CustomerHomeScreen from "./screens/CustomerHomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useCart } from "./hooks/useCart";
+import Header from "./components/Header";
 
 const AppContent = () => {
   const { user, isLoading } = useAuth();
-  const [currentScreen, setCurrentScreen] = useState("login");
+  const [currentScreen, setCurrentScreen] = useState("home");
   const { logout } = useAuth();
   const cart = useCart();
-
-  useEffect(() => {
-    if (!isLoading) {
-      setCurrentScreen(user ? "home" : "login");
-    }
-  }, [user, isLoading]);
 
   const renderScreen = () => {
     if (isLoading) {
@@ -29,7 +24,12 @@ const AppContent = () => {
 
     switch (currentScreen) {
       case "home":
-        return <CustomerHomeScreen />;
+        return (
+          <CustomerHomeScreen
+            onSwitchToLogin={() => setCurrentScreen("login")}
+            setCurrentScreen={setCurrentScreen}
+          />
+        );
       case "login":
         return <LoginScreen onSwitchToHome={() => setCurrentScreen("home")} />;
       default:
@@ -39,33 +39,11 @@ const AppContent = () => {
 
   return (
     <div className="container">
-      {currentScreen !== "login" && (
-        <header className="header">
-          <div className="header-content">
-            <h1 className="header-title">CTC Market</h1>
-            <nav className="nav">
-              <button
-                className="nav-link"
-                onClick={() => setCurrentScreen("home")}
-              >
-                Home
-              </button>
-              {user ? (
-                <button className="nav-link" onClick={logout}>
-                  Logout
-                </button>
-              ) : (
-                <button
-                  className="nav-link"
-                  onClick={() => setCurrentScreen("login")}
-                >
-                  Login
-                </button>
-              )}
-              <span className="cart-count">Cart: {cart.cartItems.length}</span>
-            </nav>
-          </div>
-        </header>
+      {!isLoading && (
+        <Header
+          currentScreen={currentScreen}
+          setCurrentScreen={setCurrentScreen}
+        />
       )}
 
       <main className="main">{renderScreen()}</main>
