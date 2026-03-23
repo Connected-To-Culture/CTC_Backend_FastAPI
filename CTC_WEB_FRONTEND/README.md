@@ -100,6 +100,21 @@ CTC_WEB_FRONTEND/
 - Ensure responsive design adapts to hidden sections
 - Add admin-only header button to access section management
 
+### UI/UX Improvements
+
+**Product Card Add to Cart Button Enhancement**
+
+- Improve the sizing and positioning of the "Add to Cart" overlay button to better cover the product image area
+- Consider making the clickable area larger while maintaining visual balance
+- Test different overlay opacity levels for better visual hierarchy
+- Ensure the button remains accessible and clearly indicates its interactive nature
+
+**Implementation Notes:**
+
+- Current overlay covers the bottom portion of product cards but may not provide optimal click area
+- Consider adjusting the overlay height and positioning to cover more of the image while preserving product visibility
+- Test on various screen sizes to ensure consistent user experience
+
 ### User Authentication & Signup System
 
 **Email Notifications & Vendor Approval Process**

@@ -182,7 +182,10 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
               <div className="nav-row">
                 {renderNavigationLinks()
                   .filter(
-                    (link) => !["login", "logout", "cart"].includes(link.key),
+                    (link) =>
+                      !["login", "logout", "cart", "profile"].includes(
+                        link.key,
+                      ),
                   )
                   .map((link) => (
                     <div key={link.key} className="nav-item">

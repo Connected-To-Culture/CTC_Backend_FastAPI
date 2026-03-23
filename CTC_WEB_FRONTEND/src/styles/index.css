@@ -6,6 +6,7 @@
 @import "./VendorSelectionModal.css";
 @import "./DeliveryPickupModal.css";
 @import "./AddToCartModal.css";
+@import "./AllModal.css";
 
 /* Global CSS styles for CTC Market */
 * {

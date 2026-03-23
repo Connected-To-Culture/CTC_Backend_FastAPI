@@ -1,0 +1,142 @@
+/* AllModal Component Styles */
+
+.all-modal .modal-content {
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.all-items-modal h2 {
+  margin-bottom: 1rem;
+  color: var(--text-light-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.select-all-container {
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: var(--text-light-primary);
+  cursor: pointer;
+}
+
+.select-all-checkbox,
+.item-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color);
+}
+
+.items-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+
+.item-row {
+  margin-bottom: 0.5rem;
+}
+
+.item-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--white);
+}
+
+.item-label:hover {
+  border-color: var(--primary-color);
+  background: var(--gray-50);
+}
+
+.item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.no-items {
+  text-align: center;
+  color: var(--text-light-secondary);
+  font-style: italic;
+  padding: 2rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.cancel-button,
+.delete-button,
+.load-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button {
+  background: var(--gray-200);
+  color: var(--text-light-primary);
+}
+
+.cancel-button:hover {
+  background: var(--gray-300);
+}
+
+.delete-button {
+  background: var(--error-color, #dc3545);
+  color: white;
+}
+
+.delete-button:hover {
+  background: var(--error-color-dark, #c82333);
+}
+
+.load-button {
+  background: var(--primary-color);
+  color: white;
+}
+
+.load-button:hover {
+  background: var(--primary-color-dark, #0056b3);
+}
+
+.load-button:disabled {
+  background: var(--gray-300);
+  color: var(--text-light-secondary);
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .all-items-modal .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .delete-button,
+  .load-button {
+    width: 100%;
+  }
+}

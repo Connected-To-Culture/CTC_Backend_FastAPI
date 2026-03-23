@@ -234,12 +234,6 @@ const ShopScreen = ({ onSwitchToHome, setCurrentScreen }) => {
   return (
     <div className="home-container">
       <div className="home-content">
-        {/* Shop Header */}
-        <div className="shop-header">
-          <h1>Shop CTC Market</h1>
-          <p>Discover fresh, local products from our community vendors</p>
-        </div>
-
         {/* Dynamic Item Type Sections */}
         {itemTypes.map((itemType) => renderItemTypeSection(itemType))}
       </div>
