@@ -56,6 +56,85 @@ CTC_WEB_FRONTEND/
 └── README.md
 ```
 
+## Future Development
+
+### Home Section Administration
+
+**Admin Feature: Dynamic Home Section Management**
+
+- Implement admin controls to hide/reveal home screen sections
+- Create a section for each item type defined in the database schema
+- Use similar modal-based editing approach as event creation/editing
+
+**Admin Feature: Home Banner Image Management**
+
+- Implement modal-based banner image upload/replacement system
+- Add image validation (file type, size limits)
+- Support for image cropping/resizing
+- Database storage for banner image URLs
+- Admin preview functionality before publishing changes
+- Integration with existing admin controls (button already added below banner)
+
+**Requirements:**
+
+- Banner management modal with:
+  - Image upload interface with drag-and-drop support
+  - Image preview and cropping tools
+  - Multiple banner support for rotation
+  - Admin approval workflow for banner changes
+- Database integration to persist admin preferences
+- Real-time updates to home screen based on admin settings
+
+- Admin dashboard with toggle switches for each section visibility
+- Section management modal with:
+  - Enable/disable toggles for each product category section
+  - Display order controls (drag-and-drop or priority numbers)
+  - Section-specific settings (number of items to display, sorting preferences)
+- Database integration to persist admin preferences
+- Real-time updates to home screen based on admin settings
+
+**Implementation Notes:**
+
+- Follow the same pattern as event admin features (modal-based editing)
+- Store section visibility and order in database
+- Ensure responsive design adapts to hidden sections
+- Add admin-only header button to access section management
+
+### User Authentication & Signup System
+
+**Email Notifications & Vendor Approval Process**
+
+**Signup Confirmation Emails:**
+
+- Send confirmation email to all new users upon successful signup
+- Email should contain welcome message and account verification link
+- Include next steps based on user role (customer vs vendor)
+- For vendors: mention that account is pending admin approval
+
+**Vendor Application Process:**
+
+- When vendor signs up, send notification email to admin
+- Include vendor details (name, email, application date, business info)
+- Create admin interface for reviewing vendor applications
+- Add "Pending Applicants" section to vendors screen for admin review
+
+**Vendor Approval/Denial System:**
+
+- Admin can approve or deny vendor applications
+- Send decision email to vendor with approval/denial status
+- Include optional admin comments in decision emails
+- Update vendor account status ('pending' → 'approved'/'denied')
+- Prevent denied vendors from accessing vendor features
+- Allow approved vendors full access to vendor dashboard
+
+**Implementation Requirements:**
+
+- Email service integration (SendGrid, AWS SES, etc.)
+- Database fields for vendor status and admin comments
+- Admin-only vendor management interface
+- Automated email templates for different scenarios
+- User status validation on login/feature access
+
 ## UI Specifications
 
 ### General Guidelines
@@ -105,6 +184,7 @@ CTC_WEB_FRONTEND/
 - Include close button, ESC, and off-clicking for closure
 - Utilities: map of event, highlights stalls, bathrooms, parking
 - Other services: free ingredient cooking stalls, 3rd party affiliates such as food trucks, etc.
+- These info will be rendered form the active event desided on by the admin
 
 ##### Subscription Prompt Section
 

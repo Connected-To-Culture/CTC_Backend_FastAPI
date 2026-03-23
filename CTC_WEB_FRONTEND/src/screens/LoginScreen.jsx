@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import "../styles/LoginScreen.css";
 
-const LoginScreen = ({ onSwitchToHome }) => {
+const LoginScreen = ({ onSwitchToHome, onSwitchToSignup }) => {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,13 +71,16 @@ const LoginScreen = ({ onSwitchToHome }) => {
             className="btn-primary-solid"
             disabled={isLoading}
           >
-            {isLoading ? "Signing In..." : "Sign In"}
+            {isLoading ? "Logging In..." : "Log In"}
           </button>
         </form>
 
         <div className="login-footer">
           <p>
-            Don't have an account? <a href="#signup">Sign up</a>
+            Don't have an account?{" "}
+            <button className="link-button" onClick={onSwitchToSignup}>
+              Sign Up
+            </button>
           </p>
         </div>
       </div>

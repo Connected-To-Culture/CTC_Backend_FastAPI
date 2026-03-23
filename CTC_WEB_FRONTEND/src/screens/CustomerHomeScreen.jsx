@@ -1,71 +1,170 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import AddToCartModal from "../modals/AddToCartModal";
 import "../styles/CustomerHomeScreen.css";
-import MapModal from "../modals/MapModal";
-import CookingStationsModal from "../modals/CookingStationsModal";
-import AffiliatesModal from "../modals/AffiliatesModal";
 
 const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
-  const { user } = useAuth();
+  const { user, sectionVisibility, toggleSectionVisibility } = useAuth();
 
-  // Modal state management
-  const [modals, setModals] = useState({
-    map: false,
-    cooking: false,
-    affiliates: false
-  });
-
-  const openModal = (modalType) => {
-    setModals(prev => ({ ...prev, [modalType]: true }));
-  };
-
-  const closeModal = (modalType) => {
-    setModals(prev => ({ ...prev, [modalType]: false }));
-  };
-
-  const closeAllModals = () => {
-    setModals({
-      map: false,
-      cooking: false,
-      affiliates: false
-    });
-  };
+  // Modal state
+  const [isAddToCartModalOpen, setIsAddToCartModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // TODO: Replace with actual event data from API/backend
   const activeEvent = null; // This will eventually come from props or API call
   // TODO: Replace with actual data from database/API
   // Fresh Products Section - sorted by highest inventory
   const freshProducts = [
-    // Will be populated from database: sort by highest inventory, limit to 5 for display
-    // Card structure: image, name, price range (min-max across vendors)/unit
+    // Will be populated from database: JOIN products p INNER JOIN inventory i ON p.id = i.product_id
+    // WHERE p.category = 'fresh' ORDER BY i.quantity DESC LIMIT 5
+    // Backend fields: id, name, description, price_per_unit, unit, category, created_at, updated_at
+    // Note: Images may be stored separately or generated from product data
   ];
 
   // Bakery & Artisan Goods Section - sorted alphabetically
   const bakeryGoods = [
-    // Will be populated from database: all non-produce goods, sorted alphabetically, limit to 5
-    // Same card structure as fresh products
+    // Will be populated from database: SELECT * FROM products WHERE category IN ('bakery', 'artisan')
+    // ORDER BY name ASC LIMIT 5
+    // Backend fields: id, name, description, price_per_unit, unit, category, created_at, updated_at
+    // Note: Images may be stored separately or generated from product data
   ];
 
-  // Site Services Section - modal triggers
-  const siteServices = [
-    { id: 'map', name: 'Event Map', description: 'Interactive map highlighting stalls, bathrooms, and parking' },
-    { id: 'cooking', name: 'Free Cooking Stations', description: 'Learn to cook with fresh ingredients' },
-    { id: 'affiliates', name: 'Food Trucks & Affiliates', description: 'Additional vendors and services' }
-    // Will trigger modals when clicked
-  ];
-  const handleExploreClick = () => {
-    if (user) {
-      // If authenticated, could navigate to vendors page
-      // For now, just show an alert
-      alert("Navigate to vendors page");
-    } else {
-      // If not authenticated, go to login
-      onSwitchToLogin();
-    }
+  // Independent data fetching functions for each section
+  const fetchFreshProducts = async () => {
+    // TODO: Implement database query for fresh products
+    // SQL: SELECT p.*, i.quantity FROM products p INNER JOIN inventory i ON p.id = i.product_id
+    //      WHERE p.category = 'fresh' ORDER BY i.quantity DESC LIMIT 5
+    // API endpoint: GET /api/products/fresh?sort=inventory&limit=5
+    // Response fields: id, name, description, price_per_unit, unit, category, created_at, updated_at, quantity
+    return [];
+  };
+
+  const fetchBakeryGoods = async () => {
+    // TODO: Implement database query for bakery goods
+    // SQL: SELECT * FROM products WHERE category IN ('bakery', 'dairy', 'artisan')
+    //      ORDER BY name ASC LIMIT 5
+    // API endpoint: GET /api/products/bakery?sort=name&limit=5
+    // Response fields: id, name, description, price_per_unit, unit, category, created_at, updated_at
+    return [];
+  };
+
+  const handleSubscribe = () => {
+    // TODO: Implement newsletter subscription functionality
+    alert("Newsletter subscription functionality will be implemented soon!");
+  };
+
+  const handleSendNewsletter = () => {
+    // TODO: Implement newsletter sending functionality for admins
+    alert("Newsletter sending functionality will be implemented soon!");
+  };
+
+  const handleAddToCart = (cartItems) => {
+    // TODO: Implement actual cart functionality
+    console.log("Adding to cart:", cartItems);
+    alert(`Added ${cartItems.length} item(s) to cart!`);
+  };
+
+  // Reusable function to render product cards for any section
+  // Note: Product images may need to be fetched separately or generated from product data
+  const renderProductCard = (product, index) => (
+    <div key={index} className="product-container">
+      <div className="product-card">
+        <div className="product-image">
+          {product?.image ? (
+            <img
+              src={product.image}
+              alt={product?.name || "Product Image"}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className="product-image-placeholder" style={{ display: product?.image ? 'none' : 'flex' }}>
+            <p>{product?.name || "Product Image"}</p>
+          </div>
+          {/* Add to Cart overlay for authenticated customers */}
+          {user && user.role === "customer" && (
+            <button
+              className="add-to-cart-overlay"
+              onClick={() => {
+                setSelectedProduct(product);
+                setIsAddToCartModalOpen(true);
+              }}
+            >
+              Add to Cart
+            </button>
+          )}
+        </div>
+      </div>
+      <h3 className="product-name">{product?.name ? product.name : "Product Name"}</h3>
+      <p className="product-price">
+        {product?.price_per_unit ? `$${product.price_per_unit}` : "Price"}/
+        {product?.unit ? product.unit : "unit"}
+      </p>
+    </div>
+  );
+
+  // Reusable function to render product sections with consistent styling
+  const renderProductSection = (title, description, products, sectionId, showNavArrows = false) => {
+    // Check if section should be visible
+    const isVisible = user && user.role === "admin" ? true : sectionVisibility[sectionId] !== false;
+    if (!isVisible) return null;
+
+    return (
+      <div key={sectionId} className="content-card">
+        <div className="section-header">
+          <h2>{title}</h2>
+          {user && user.role === "admin" && (
+            <div className="admin-section-controls">
+              <label className="section-toggle">
+                <input
+                  type="checkbox"
+                  checked={sectionVisibility[sectionId] !== false}
+                  onChange={() => toggleSectionVisibility(sectionId)}
+                />
+                <span className="toggle-slider"></span>
+                <span className="toggle-label">Visible to Customers</span>
+              </label>
+            </div>
+          )}
+          {showNavArrows && (
+            <div className="nav-arrows">
+              <button className="nav-arrow">&larr;</button>
+              <button className="nav-arrow">&rarr;</button>
+            </div>
+          )}
+        </div>
+        <p>{description}</p>
+        <div className="products-grid">
+          {products.map((product, index) =>
+            renderProductCard(product, `${sectionId}-${index}`)
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="home-container">
+      {/* Banner Section - Full Width */}
+      <div className="banner-section">
+        <img
+          src="https://images.squarespace-cdn.com/content/v1/5f18f60a27b18a18b58dee31/46e4605d-0e0c-4d44-a0a3-8de521f4fa41/shelley-pauls-G7WdvR8rDPg-unsplash.jpg?format=2500w"
+          alt="CTC Market Banner"
+          className="banner-image"
+        />
+      </div>
+
+      {/* Admin Banner Controls */}
+      {user && user.role === "admin" && (
+        <div className="admin-banner-controls">
+          <button className="admin-banner-btn">
+            Change Banner Image
+          </button>
+        </div>
+      )}
+
       <div className="home-content">
         {/* Active Event Section */}
         <div className="active-event-section">
@@ -109,136 +208,70 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
         </div>
 
         <div className="content-grid">
-          <div className="content-card">
-            <div className="section-header">
-              <h2>Fresh Products</h2>
-              <div className="nav-arrows">
-                <button className="nav-arrow">&larr;</button>
-                <button className="nav-arrow">&rarr;</button>
-              </div>
-            </div>
-            <p>Discover locally sourced fresh produce and goods from our community vendors.</p>
-            <div className="products-grid">
-              {/* TODO: Map through freshProducts array and display cards */}
-              <div className="product-card">
-                <div className="product-image">{freshProducts[0]?.image ? freshProducts[0].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{freshProducts[0]?.name ? freshProducts[0].name : "Product Name"}</h3>
-                  <p>{freshProducts[0]?.priceRange ? freshProducts[0].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{freshProducts[1]?.image ? freshProducts[1].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{freshProducts[1]?.name ? freshProducts[1].name : "Product Name"}</h3>
-                  <p>{freshProducts[1]?.priceRange ? freshProducts[1].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{freshProducts[2]?.image ? freshProducts[2].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{freshProducts[2]?.name ? freshProducts[2].name : "Product Name"}</h3>
-                  <p>{freshProducts[2]?.priceRange ? freshProducts[2].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{freshProducts[3]?.image ? freshProducts[3].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{freshProducts[3]?.name ? freshProducts[3].name : "Product Name"}</h3>
-                  <p>{freshProducts[3]?.priceRange ? freshProducts[3].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{freshProducts[4]?.image ? freshProducts[4].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{freshProducts[4]?.name ? freshProducts[4].name : "Product Name"}</h3>
-                  <p>{freshProducts[4]?.priceRange ? freshProducts[4].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          {renderProductSection(
+            "Fresh Products",
+            "Discover locally sourced fresh produce and goods from our community vendors.",
+            Array.from({ length: 5 }, (_, index) => freshProducts[index]),
+            "fresh",
+            true
+          )}
 
-          <div className="content-card">
-            <div className="section-header">
-              <h2>Bakery & Artisan Goods</h2>
-              <div className="nav-arrows">
-                <button className="nav-arrow">&larr;</button>
-                <button className="nav-arrow">&rarr;</button>
-              </div>
-            </div>
-            <p>Explore handmade baked goods and artisanal products from local makers.</p>
-            <div className="products-grid">
-              {/* TODO: Map through bakeryGoods array and display cards */}
-              <div className="product-card">
-                <div className="product-image">{bakeryGoods[0]?.image ? bakeryGoods[0].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{bakeryGoods[0]?.name ? bakeryGoods[0].name : "Product Name"}</h3>
-                  <p>{bakeryGoods[0]?.priceRange ? bakeryGoods[0].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{bakeryGoods[1]?.image ? bakeryGoods[1].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{bakeryGoods[1]?.name ? bakeryGoods[1].name : "Product Name"}</h3>
-                  <p>{bakeryGoods[1]?.priceRange ? bakeryGoods[1].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{bakeryGoods[2]?.image ? bakeryGoods[2].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{bakeryGoods[2]?.name ? bakeryGoods[2].name : "Product Name"}</h3>
-                  <p>{bakeryGoods[2]?.priceRange ? bakeryGoods[2].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{bakeryGoods[3]?.image ? bakeryGoods[3].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{bakeryGoods[3]?.name ? bakeryGoods[3].name : "Product Name"}</h3>
-                  <p>{bakeryGoods[3]?.priceRange ? bakeryGoods[3].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-              <div className="product-card">
-                <div className="product-image">{bakeryGoods[4]?.image ? bakeryGoods[4].image : "Product Image"}</div>
-                <div className="product-info">
-                  <h3>{bakeryGoods[4]?.name ? bakeryGoods[4].name : "Product Name"}</h3>
-                  <p>{bakeryGoods[4]?.priceRange ? bakeryGoods[4].priceRange : "Price Range"}/unit</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="content-card">
-            <h2>Site Services</h2>
-            <p>Access event utilities and additional services available at the market.</p>
-            <div className="services-grid">
-              {/* TODO: Map through siteServices array and display service cards */}
-              {siteServices.map(service => (
-                <div key={service.id} className="service-card" onClick={() => openModal(service.id)}>
-                  <h3>{service.name}</h3>
-                  <p>{service.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderProductSection(
+            "Bakery & Artisan Goods",
+            "Explore handmade baked goods and artisanal products from local makers.",
+            Array.from({ length: 5 }, (_, index) => bakeryGoods[index]),
+            "bakery",
+            true
+          )}
         </div>
 
         <div className="cta-section">
-          <h2>{user ? "Ready to Shop?" : "Join Our Community"}</h2>
-          <p>
-            {user
-              ? "Browse our vendors and discover amazing local products."
-              : "Sign in to start shopping and connect with local vendors."}
-          </p>
-          <button className="btn-primary-solid" onClick={handleExploreClick}>
-            {user ? "Explore Vendors" : "Sign In"}
-          </button>
+          {user && user.role === "admin" ? (
+            // Admin Newsletter Management View
+            <>
+              <h2>Inform the Community</h2>
+              <div className="newsletter-stats">
+                <div className="stat-group">
+                  <h3>Customer Accounts: <span className="stat-number">Unavailable</span></h3>
+                  <div className="opt-in-stats">
+                    <p>Email: <span className="stat-number">Unavailable</span></p>
+                    <p>SMS: <span className="stat-number">Unavailable</span></p>
+                  </div>
+                </div>
+                <div className="stat-group">
+                  <h3>Vendor Accounts: <span className="stat-number">Unavailable</span></h3>
+                  <div className="opt-in-stats">
+                    <p>Email: <span className="stat-number">Unavailable</span></p>
+                    <p>SMS: <span className="stat-number">Unavailable</span></p>
+                  </div>
+                </div>
+              </div>
+              <button className="btn-primary-solid" onClick={handleSendNewsletter}>
+                Send Newsletter
+              </button>
+            </>
+          ) : (
+            // Regular User Subscription View
+            <>
+              <h2>Stay Connected</h2>
+              <p>
+                Subscribe to receive updates on new products, special events, and community announcements.
+              </p>
+              <button className="btn-primary-solid" onClick={handleSubscribe}>
+                Subscribe
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Modals */}
-      <MapModal isOpen={modals.map} onClose={() => closeModal('map')} />
-      <CookingStationsModal isOpen={modals.cooking} onClose={() => closeModal('cooking')} />
-      <AffiliatesModal isOpen={modals.affiliates} onClose={() => closeModal('affiliates')} />
+      {/* Add to Cart Modal */}
+      <AddToCartModal
+        isOpen={isAddToCartModalOpen}
+        onClose={() => setIsAddToCartModalOpen(false)}
+        product={selectedProduct}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };

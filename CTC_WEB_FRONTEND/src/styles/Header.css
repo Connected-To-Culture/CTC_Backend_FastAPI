@@ -83,7 +83,7 @@
   font-weight: 400;
   color: var(--text-light-primary);
   margin: 0;
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "acumin-pro", sans-serif;
 }
 
 .nav-links {
@@ -163,6 +163,18 @@
 
 .auth-link {
   font-weight: 600;
+}
+
+.cart-icon {
+  font-size: 1.25rem;
+  padding: 0.25rem 0.5rem;
+  min-width: auto;
+}
+
+.cart-icon:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 4px;
 }
 
 /* Responsive Design */

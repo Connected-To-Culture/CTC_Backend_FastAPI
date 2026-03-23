@@ -13,8 +13,12 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sectionVisibility, setSectionVisibility] = useState({
+    fresh: true,
+    bakery: true,
+  });
 
-  // Load user from localStorage on mount
+  // Load user and section visibility from localStorage on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -24,6 +28,14 @@ export const AuthProvider = ({ children }) => {
           const userData = JSON.parse(storedUser);
           setUser(userData);
         }
+
+        // Check for stored section visibility in localStorage
+        const storedVisibility = localStorage.getItem("ctc_section_visibility");
+        if (storedVisibility) {
+          const visibilityData = JSON.parse(storedVisibility);
+          setSectionVisibility(visibilityData);
+        }
+
         // TODO: Implement actual authentication check with backend
         // For now, we'll just simulate loading
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -48,6 +60,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user, isLoading]);
 
+  // Save section visibility to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(
+      "ctc_section_visibility",
+      JSON.stringify(sectionVisibility),
+    );
+  }, [sectionVisibility]);
+
   const login = async (email, password) => {
     try {
       setIsLoading(true);
@@ -64,6 +84,25 @@ export const AuthProvider = ({ children }) => {
         name: email.split("@")[0],
       };
       setUser(dummyUser);
+      setIsLoading(false);
+      return { success: true };
+    } catch (error) {
+      setIsLoading(false);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const signup = async (userData) => {
+    try {
+      setIsLoading(true);
+      // TODO: Implement actual signup with backend
+      // For now, create a new user account
+      const newUser = {
+        email: userData.email,
+        role: userData.role,
+        name: userData.name,
+      };
+      setUser(newUser);
       setIsLoading(false);
       return { success: true };
     } catch (error) {
@@ -90,12 +129,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const toggleSectionVisibility = (sectionId) => {
+    setSectionVisibility((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
   const value = {
     user,
     isLoading,
+    sectionVisibility,
     login,
+    signup,
     logout,
     switchRole,
+    toggleSectionVisibility,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -22,7 +22,7 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
   };
 
   const roleOptions = [
-    { value: "not-signed-in", label: "Not Signed In" },
+    { value: "not-signed-in", label: "Not Logged In" },
     { value: "customer", label: "Customer" },
     { value: "vendor", label: "Vendor" },
     { value: "admin", label: "Admin" },
@@ -33,8 +33,14 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
 
   // NAVIGATION BAR SECTION
   const renderNavigationLinks = () => {
+    const isVendorOrAdmin =
+      user && (user.role === "vendor" || user.role === "admin");
     const baseLinks = [
-      { key: "shop", label: "SHOP", action: () => setCurrentScreen("shop") },
+      {
+        key: "shop",
+        label: isVendorOrAdmin ? "INVENTORY" : "SHOP",
+        action: () => setCurrentScreen("shop"),
+      },
       {
         key: "events",
         label: "EVENTS",
@@ -50,15 +56,33 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
 
     const authenticatedLinks = user
       ? [
-          // Add account/cart icons here when implemented
-          // { key: "account", label: "ACCOUNT", action: () => setCurrentScreen("account") },
-          { key: "logout", label: "LOGOUT", action: logout },
+          // Cart icon for customers
+          ...(user.role === "customer"
+            ? [
+                {
+                  key: "cart",
+                  label: "🛒",
+                  action: () => setCurrentScreen("cart"),
+                },
+              ]
+            : []),
+          { key: "logout", label: "LOG OUT", action: logout },
+          {
+            key: "profile",
+            label: "PROFILE",
+            action: () => setCurrentScreen("profile"),
+          },
         ]
       : [
           {
             key: "login",
-            label: "LOGIN",
+            label: "LOG IN",
             action: () => setCurrentScreen("login"),
+          },
+          {
+            key: "signup",
+            label: "SIGN UP",
+            action: () => setCurrentScreen("signup"),
           },
         ];
 
@@ -157,7 +181,9 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
             <nav className="nav-container">
               <div className="nav-row">
                 {renderNavigationLinks()
-                  .filter((link) => !["login", "logout"].includes(link.key))
+                  .filter(
+                    (link) => !["login", "logout", "cart"].includes(link.key),
+                  )
                   .map((link) => (
                     <div key={link.key} className="nav-item">
                       <button
@@ -240,11 +266,15 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
           {/* Auth Section */}
           <div className="header-section auth-section">
             {renderNavigationLinks()
-              .filter((link) => ["login", "logout"].includes(link.key))
+              .filter((link) =>
+                ["login", "logout", "signup", "cart", "profile"].includes(
+                  link.key,
+                ),
+              )
               .map((link) => (
                 <button
                   key={link.key}
-                  className="nav-link auth-link"
+                  className={`nav-link auth-link ${link.key === "cart" ? "cart-icon" : ""}`}
                   onClick={link.action}
                 >
                   {link.label}

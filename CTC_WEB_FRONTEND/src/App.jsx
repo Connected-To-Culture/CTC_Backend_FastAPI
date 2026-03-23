@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import CustomerHomeScreen from "./screens/CustomerHomeScreen";
 import LoginScreen from "./screens/LoginScreen";
+import SignUpScreen from "./screens/SignUpScreen";
+import ShopScreen from "./screens/ShopScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useCart } from "./hooks/useCart";
 import Header from "./components/Header";
@@ -31,7 +33,26 @@ const AppContent = () => {
           />
         );
       case "login":
-        return <LoginScreen onSwitchToHome={() => setCurrentScreen("home")} />;
+        return (
+          <LoginScreen
+            onSwitchToHome={() => setCurrentScreen("home")}
+            onSwitchToSignup={() => setCurrentScreen("signup")}
+          />
+        );
+      case "signup":
+        return (
+          <SignUpScreen
+            onSwitchToHome={() => setCurrentScreen("home")}
+            onSwitchToLogin={() => setCurrentScreen("login")}
+          />
+        );
+      case "shop":
+        return (
+          <ShopScreen
+            onSwitchToHome={() => setCurrentScreen("home")}
+            setCurrentScreen={setCurrentScreen}
+          />
+        );
       default:
         return <LoginScreen onSwitchToHome={() => setCurrentScreen("home")} />;
     }
