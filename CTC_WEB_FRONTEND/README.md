@@ -378,7 +378,7 @@ CTC_WEB_FRONTEND/
 
 ##### Body
 
-- Auto-fill based on active event inventory 
+- Auto-fill based on active event inventory
 - Item cards listed alphabetically, 5 across, unlimited down
 - Zero stock items greyed out and disabled, listed last
 
