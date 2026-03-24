@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import AddToCartModal from "../modals/AddToCartModal";
+import useProductCard from "../hooks/useProductCard";
 import "../styles/CustomerHomeScreen.css";
 
 const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
@@ -66,49 +67,24 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
 
   // Reusable function to render product cards for any section
   // Note: Product images may need to be fetched separately or generated from product data
-  const renderProductCard = (product, index) => (
-    <div key={index} className="product-container">
-      <div className="product-card">
-        <div className="product-image">
-          {product?.image ? (
-            <img
-              src={product.image}
-              alt={product?.name || "Product Image"}
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-          ) : null}
-          <div className="product-image-placeholder" style={{ display: product?.image ? 'none' : 'flex' }}>
-            <p>{product?.name || "Product Image"}</p>
-          </div>
-          {/* Add to Cart overlay for authenticated customers */}
-          {user && user.role === "customer" && (
-            <button
-              className="add-to-cart-overlay"
-              onClick={() => {
-                setSelectedProduct(product);
-                setIsAddToCartModalOpen(true);
-              }}
-            >
-              Add to Cart
-            </button>
-          )}
-        </div>
-      </div>
-      <h3 className="product-name">{product?.name ? product.name : "Product Name"}</h3>
-      <p className="product-price">
-        {product?.price_per_unit ? `$${product.price_per_unit}` : "Price"}/
-        {product?.unit ? product.unit : "unit"}
-      </p>
-    </div>
-  );
+  const renderProductCard = useProductCard((product) => {
+    setSelectedProduct(product);
+    setIsAddToCartModalOpen(true);
+  });
 
   // Reusable function to render product sections with consistent styling
-  const renderProductSection = (title, description, products, sectionId, showNavArrows = false) => {
+  const renderProductSection = (
+    title,
+    description,
+    products,
+    sectionId,
+    showNavArrows = false,
+  ) => {
     // Check if section should be visible
-    const isVisible = user && user.role === "admin" ? true : sectionVisibility[sectionId] !== false;
+    const isVisible =
+      user && user.role === "admin"
+        ? true
+        : sectionVisibility[sectionId] !== false;
     if (!isVisible) return null;
 
     return (
@@ -138,7 +114,7 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
         <p>{description}</p>
         <div className="products-grid">
           {products.map((product, index) =>
-            renderProductCard(product, `${sectionId}-${index}`)
+            renderProductCard(product, `${sectionId}-${index}`),
           )}
         </div>
       </div>
@@ -159,9 +135,7 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
       {/* Admin Banner Controls */}
       {user && user.role === "admin" && (
         <div className="admin-banner-controls">
-          <button className="admin-banner-btn">
-            Change Banner Image
-          </button>
+          <button className="admin-banner-btn">Change Banner Image</button>
         </div>
       )}
 
@@ -213,7 +187,7 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
             "Discover locally sourced fresh produce and goods from our community vendors.",
             Array.from({ length: 5 }, (_, index) => freshProducts[index]),
             "fresh",
-            true
+            true,
           )}
 
           {renderProductSection(
@@ -221,7 +195,7 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
             "Explore handmade baked goods and artisanal products from local makers.",
             Array.from({ length: 5 }, (_, index) => bakeryGoods[index]),
             "bakery",
-            true
+            true,
           )}
         </div>
 
@@ -232,21 +206,38 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
               <h2>Inform the Community</h2>
               <div className="newsletter-stats">
                 <div className="stat-group">
-                  <h3>Customer Accounts: <span className="stat-number">Unavailable</span></h3>
+                  <h3>
+                    Customer Accounts:{" "}
+                    <span className="stat-number">Unavailable</span>
+                  </h3>
                   <div className="opt-in-stats">
-                    <p>Email: <span className="stat-number">Unavailable</span></p>
-                    <p>SMS: <span className="stat-number">Unavailable</span></p>
+                    <p>
+                      Email: <span className="stat-number">Unavailable</span>
+                    </p>
+                    <p>
+                      SMS: <span className="stat-number">Unavailable</span>
+                    </p>
                   </div>
                 </div>
                 <div className="stat-group">
-                  <h3>Vendor Accounts: <span className="stat-number">Unavailable</span></h3>
+                  <h3>
+                    Vendor Accounts:{" "}
+                    <span className="stat-number">Unavailable</span>
+                  </h3>
                   <div className="opt-in-stats">
-                    <p>Email: <span className="stat-number">Unavailable</span></p>
-                    <p>SMS: <span className="stat-number">Unavailable</span></p>
+                    <p>
+                      Email: <span className="stat-number">Unavailable</span>
+                    </p>
+                    <p>
+                      SMS: <span className="stat-number">Unavailable</span>
+                    </p>
                   </div>
                 </div>
               </div>
-              <button className="btn-primary-solid" onClick={handleSendNewsletter}>
+              <button
+                className="btn-primary-solid"
+                onClick={handleSendNewsletter}
+              >
                 Send Newsletter
               </button>
             </>
@@ -255,7 +246,8 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
             <>
               <h2>Stay Connected</h2>
               <p>
-                Subscribe to receive updates on new products, special events, and community announcements.
+                Subscribe to receive updates on new products, special events,
+                and community announcements.
               </p>
               <button className="btn-primary-solid" onClick={handleSubscribe}>
                 Subscribe

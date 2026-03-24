@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import ToggleSwitch from "./ToggleSwitch";
+import AllModal from "../modals/AllModal";
+import useProductCard from "../hooks/useProductCard";
 import "../styles/Header.css";
 
 const Header = ({ currentScreen, setCurrentScreen }) => {
-  const { user, switchRole, logout } = useAuth();
+  const { user, switchRole, logout, sectionVisibility } = useAuth();
+
+  const renderProductCard = useProductCard();
 
   // TESTING SECTION - REMOVE IN PRODUCTION
   // To remove testing functionality:
@@ -30,6 +34,141 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
 
   const currentRole = user ? user.role : "not-signed-in";
   // END TESTING SECTION
+
+  // ALL ITEMS MODAL STATE
+  const [isAllItemsModalOpen, setIsAllItemsModalOpen] = useState(false);
+  const [allItemsData, setAllItemsData] = useState({
+    items: [],
+    title: "",
+    itemType: "",
+    renderItem: null,
+    keyExtractor: null,
+  });
+
+  // Available item types (should come from schema/API)
+  const availableItemTypes = [
+    { id: "fresh", name: "Fresh Produce" },
+    { id: "bakery", name: "Bakery & Artisan" },
+    // TODO: Add more item types from schema
+  ];
+
+  // ALL ITEMS MODAL FUNCTIONS
+  const handleOpenAllItemsModal = async (itemType) => {
+    let title = "";
+    let renderItem = null;
+    let keyExtractor = null;
+
+    // Configure modal based on item type
+    switch (itemType) {
+      case "products":
+        title = "All Products";
+        renderItem = renderProductCard;
+        keyExtractor = (product) => product.id;
+        break;
+      case "events":
+        title = "All Events";
+        renderItem = (event) => (
+          <div className="modal-event-container">
+            <div className="modal-event-card">
+              <div className="modal-event-image">
+                {event?.image ? (
+                  <img
+                    src={event.image}
+                    alt={event?.name || "Event Image"}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="modal-event-image-placeholder"
+                  style={{ display: event?.image ? "none" : "flex" }}
+                >
+                  <p>{event?.name || "Event Image"}</p>
+                </div>
+              </div>
+            </div>
+            <div className="modal-event-details">
+              <h3 className="modal-event-name">
+                {event?.name ? event.name : "Event Name"}
+              </h3>
+              <p className="modal-event-info">
+                {event?.date ? event.date : "Date"} at{" "}
+                {event?.location ? event.location : "Location"}
+              </p>
+              <span className="modal-event-category">{event.category}</span>
+            </div>
+          </div>
+        );
+        keyExtractor = (event) => event.id;
+        break;
+      case "vendors":
+        title = "All Vendors";
+        renderItem = (vendor) => (
+          <div className="modal-vendor-container">
+            <div className="modal-vendor-card">
+              <div className="modal-vendor-image">
+                {vendor?.image ? (
+                  <img
+                    src={vendor.image}
+                    alt={vendor?.name || "Vendor Image"}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="modal-vendor-image-placeholder"
+                  style={{ display: vendor?.image ? "none" : "flex" }}
+                >
+                  <p>{vendor?.name || "Vendor Image"}</p>
+                </div>
+              </div>
+            </div>
+            <div className="modal-vendor-details">
+              <h3 className="modal-vendor-name">
+                {vendor?.name ? vendor.name : "Vendor Name"}
+              </h3>
+              <p className="modal-vendor-description">
+                {vendor?.description
+                  ? vendor.description
+                  : "Vendor Description"}
+              </p>
+              <span className="modal-vendor-category">{vendor.category}</span>
+            </div>
+          </div>
+        );
+        keyExtractor = (vendor) => vendor.id;
+        break;
+      default:
+        return;
+    }
+
+    // TODO: Fetch data from API based on itemType
+    // const items = await fetchAllItems(itemType);
+
+    setAllItemsData({
+      items: [],
+      title,
+      itemType,
+      renderItem,
+      keyExtractor,
+    });
+    setIsAllItemsModalOpen(true);
+  };
+
+  const handleLoadItems = (selectedItems) => {
+    // TODO: Handle loading selected items based on type
+    // (e.g., add products to cart, navigate to event details, etc.)
+    console.log(`Loading ${allItemsData.itemType}:`, selectedItems);
+  };
+
+  const handleItemTypeToggle = (selectedTypes) => {
+    // TODO: Filter items based on selected types
+    console.log("Selected item types:", selectedTypes);
+  };
 
   // NAVIGATION BAR SECTION
   const renderNavigationLinks = () => {
@@ -106,22 +245,22 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
           utilities.push({
             key: "all-events",
             label: "ALL EVENTS",
-            action: () => {
-              // TODO: Open all events modal
-              console.log("Open all events modal");
-            },
+            action: () => handleOpenAllItemsModal("events"),
           });
         }
         break;
       case "vendors":
-        utilities.push({
-          key: "all-vendors",
-          label: "ALL VENDORS",
-          action: () => {
-            // TODO: Open all vendors modal
-            console.log("Open all vendors modal");
-          },
-        });
+        if (
+          user.role === "customer" ||
+          user.role === "vendor" ||
+          user.role === "admin"
+        ) {
+          utilities.push({
+            key: "all-vendors",
+            label: "ALL VENDORS",
+            action: () => handleOpenAllItemsModal("vendors"),
+          });
+        }
         break;
       case "shop":
         if (
@@ -132,10 +271,7 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
           utilities.push({
             key: "all-products",
             label: "ALL PRODUCTS",
-            action: () => {
-              // TODO: Open all products modal
-              console.log("Open all products modal");
-            },
+            action: () => handleOpenAllItemsModal("products"),
           });
         }
         break;
@@ -183,9 +319,13 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
                 {renderNavigationLinks()
                   .filter(
                     (link) =>
-                      !["login", "logout", "cart", "profile"].includes(
-                        link.key,
-                      ),
+                      ![
+                        "login",
+                        "logout",
+                        "cart",
+                        "profile",
+                        "signup",
+                      ].includes(link.key),
                   )
                   .map((link) => (
                     <div key={link.key} className="nav-item">
@@ -286,6 +426,22 @@ const Header = ({ currentScreen, setCurrentScreen }) => {
           </div>
         </div>
       </div>
+
+      {/* ALL ITEMS MODAL */}
+      <AllModal
+        isOpen={isAllItemsModalOpen}
+        onClose={() => setIsAllItemsModalOpen(false)}
+        title={allItemsData.title}
+        items={allItemsData.items}
+        onLoad={handleLoadItems}
+        itemType={allItemsData.itemType}
+        renderItem={allItemsData.renderItem}
+        keyExtractor={allItemsData.keyExtractor}
+        availableItemTypes={availableItemTypes}
+        sectionVisibility={sectionVisibility}
+        userRole={user ? user.role : null}
+        onItemTypeToggle={handleItemTypeToggle}
+      />
     </header>
   );
 };

@@ -150,6 +150,25 @@ CTC_WEB_FRONTEND/
 - Automated email templates for different scenarios
 - User status validation on login/feature access
 
+### Modal Component Refactoring
+
+**Reusable Dropdown Component**
+
+- Extract the vendor/event selection dropdown from AllModal into a reusable component
+- Rename component to reflect generic selection functionality (e.g., `SelectionDropdown`)
+- Update CSS classes to use generic naming convention
+- Modify button activation paths to use new component props
+- Support different sorting methods (alphabetical, chronological, etc.) via props
+- Enable customization of item display and selection logic
+
+**Implementation Notes:**
+
+- Create `SelectionDropdown.jsx` component with configurable props
+- Update `AllModal.jsx` to use the new reusable component
+- Ensure backward compatibility with existing vendor selection
+- Add support for event selection with date display
+- Maintain consistent styling across different usage contexts
+
 ## UI Specifications
 
 ### General Guidelines
@@ -355,14 +374,13 @@ CTC_WEB_FRONTEND/
 
 ##### Header
 
-- Search bar pinned below header
-- Auto-fill based on active event inventory (greyed out if zero stock)
+- All products sub link
 
 ##### Body
 
+- Auto-fill based on active event inventory 
 - Item cards listed alphabetically, 5 across, unlimited down
-- Zero stock items greyed out and disabled
-- Search supports multiple items with commas
+- Zero stock items greyed out and disabled, listed last
 
 ##### Add to Cart Modal
 

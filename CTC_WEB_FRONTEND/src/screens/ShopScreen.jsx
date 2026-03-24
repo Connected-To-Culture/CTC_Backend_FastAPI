@@ -60,6 +60,13 @@ const ShopScreen = ({ onSwitchToHome, setCurrentScreen }) => {
     loadInventory();
   }, [user]);
 
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user) {
+      setCurrentScreen("login");
+    }
+  }, [user, setCurrentScreen]);
+
   const handleAddToCart = (cartItems) => {
     // TODO: Implement actual cart functionality
     console.log("Adding to cart:", cartItems);
@@ -181,43 +188,6 @@ const ShopScreen = ({ onSwitchToHome, setCurrentScreen }) => {
 
     return renderProductSection(itemType, displayProducts, false);
   };
-
-  if (!user) {
-    return (
-      <div className="home-container">
-        <div className="home-content">
-          <div className="cta-section">
-            <h2>Please Log In</h2>
-            <p>You must be logged in to access the shop.</p>
-            <button
-              style={{
-                padding: "0.5rem 1rem",
-                fontSize: "0.9rem",
-                backgroundColor: "var(--primary-color)",
-                color: "var(--background-dark)",
-                border: "none",
-                borderRadius: "0",
-                fontWeight: "500",
-                cursor: "pointer",
-                fontFamily: '"acumin-pro", sans-serif',
-                transition: "all 0.2s",
-                display: "inline-block",
-                width: "auto",
-                margin: "0 auto",
-              }}
-              onClick={() => setCurrentScreen("login")}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#5ecf0a")}
-              onMouseLeave={(e) =>
-                (e.target.style.backgroundColor = "var(--primary-color)")
-              }
-            >
-              Log In
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
