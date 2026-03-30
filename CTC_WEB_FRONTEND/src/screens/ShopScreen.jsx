@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import AddToCartModal from "../modals/AddToCartModal";
+import useProductCard from "../hooks/useProductCard";
 import "../styles/CustomerHomeScreen.css";
 
 const ShopScreen = ({ onSwitchToHome, setCurrentScreen }) => {
@@ -67,56 +68,14 @@ const ShopScreen = ({ onSwitchToHome, setCurrentScreen }) => {
     }
   }, [user, setCurrentScreen]);
 
-  const handleAddToCart = (cartItems) => {
-    // TODO: Implement actual cart functionality
-    console.log("Adding to cart:", cartItems);
-    alert(`Added ${cartItems.length} item(s) to cart!`);
+  const handleAddToCart = (product) => {
+    setSelectedProduct(product);
+    setIsAddToCartModalOpen(true);
   };
 
-  // Reusable product card renderer (same as home screen)
-  const renderProductCard = (product, index) => (
-    <div key={index} className="product-container">
-      <div className="product-card">
-        <div className="product-image">
-          {product?.image ? (
-            <img
-              src={product.image}
-              alt={product?.name || "Product Image"}
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextSibling.style.display = "flex";
-              }}
-            />
-          ) : null}
-          <div
-            className="product-image-placeholder"
-            style={{ display: product?.image ? "none" : "flex" }}
-          >
-            <p>{product?.name || "Product Image"}</p>
-          </div>
-          {/* Add to Cart overlay for authenticated customers */}
-          {user && user.role === "customer" && (
-            <button
-              className="add-to-cart-overlay"
-              onClick={() => {
-                setSelectedProduct(product);
-                setIsAddToCartModalOpen(true);
-              }}
-            >
-              Add to Cart
-            </button>
-          )}
-        </div>
-      </div>
-      <h3 className="product-name">
-        {product?.name ? product.name : "Product Name"}
-      </h3>
-      <p className="product-price">
-        {product?.price_per_unit ? `$${product.price_per_unit}` : "Price"}/
-        {product?.unit ? product.unit : "unit"}
-      </p>
-    </div>
-  );
+  const renderProductCard = useProductCard({
+    onAddToCart: handleAddToCart,
+  });
 
   // Reusable function to render product sections with consistent styling
   const renderProductSection = (itemType, products, showNavArrows = false) => (

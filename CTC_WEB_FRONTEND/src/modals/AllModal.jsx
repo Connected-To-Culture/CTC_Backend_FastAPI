@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/AllModal.css";
 import useProductCard from "../hooks/useProductCard";
+import useProductMeta from "../hooks/useProductMeta";
 
 const AllModal = ({
   isOpen,
@@ -21,7 +22,10 @@ const AllModal = ({
   const renderProductCard = useProductCard({
     showAddToCart: false,
     layout: "allmodal",
+    hideNameAndPrice: true,
   });
+
+  const productMeta = useProductMeta();
 
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
@@ -40,11 +44,15 @@ const AllModal = ({
   });
   const [availableVendors, setAvailableVendors] = useState([]);
   const [selectedVendors, setSelectedVendors] = useState(new Set());
-  const [showVendorModal, setShowVendorModal] = useState(false);
 
   const [availableEvents, setAvailableEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showEventModal, setShowEventModal] = useState(false);
+  // Allow multiple events to be selected (modal supports select all)
+  const [selectedEvents, setSelectedEvents] = useState(new Set());
+  const [modalType, setModalType] = useState(null);
+
+  // Temporary selection state used inside vendor/event dropdown modals
+  const [tempSelectedVendors, setTempSelectedVendors] = useState(new Set());
+  const [tempSelectedEventIds, setTempSelectedEventIds] = useState(new Set());
 
   const isVendor = userRole === "vendor";
 
@@ -87,46 +95,42 @@ const AllModal = ({
 
         // Determine active event
         const today = new Date().toISOString().split("T")[0];
-        let activeEvent = mockEvents.find(
+        const activeEvent = mockEvents.find(
           (e) => e.start <= today && e.end >= today,
         );
-        if (!activeEvent) {
-          const upcoming = mockEvents
-            .filter((e) => e.start > today)
-            .sort((a, b) => a.start.localeCompare(b.start));
-          activeEvent = upcoming[0];
+        if (activeEvent) {
+          setSelectedEvents(new Set([activeEvent.id]));
         }
-        if (!activeEvent) {
-          const recent = mockEvents.sort((a, b) => b.end.localeCompare(a.end));
-          activeEvent = recent[0];
-        }
-        setSelectedEvent(activeEvent || null);
+      }
+      // Provide sensible fallbacks when no vendors or events are available
+      if (!availableVendors || availableVendors.length === 0) {
+        const fallbackVendor = { id: "ctc-market", name: "CTC Market" };
+        setAvailableVendors([fallbackVendor]);
+        setSelectedVendors(new Set([fallbackVendor.id]));
+      }
+
+      if (!availableEvents || availableEvents.length === 0) {
+        const fallbackEvent = {
+          id: "dc-farmers-2026",
+          name: "DC Farmers Market (Summer 2026)",
+          start: "2026-06-01",
+          end: "2026-08-31",
+        };
+        setAvailableEvents([fallbackEvent]);
+        if (!selectedEvents || selectedEvents.size === 0)
+          setSelectedEvents(new Set([fallbackEvent.id]));
       }
     }
-  }, [isOpen, availableItemTypes, sectionVisibility, userRole, isVendor]);
-
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
-      onClose();
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen]);
+
+  // Initialize temporary modal selections when modal opens
+  useEffect(() => {
+    if (modalType === "vendor") {
+      setTempSelectedVendors(new Set(selectedVendors));
+    } else if (modalType === "event") {
+      setTempSelectedEventIds(new Set(selectedEvents));
+    }
+  }, [modalType, selectedVendors, selectedEvents]);
 
   const handleItemTypeToggle = (itemTypeId) => {
     const newSelected = new Set(selectedItemTypes);
@@ -198,9 +202,12 @@ const AllModal = ({
   };
 
   const handleEventToggle = (eventId) => {
-    const event = availableEvents.find((e) => e.id === eventId);
-    setSelectedEvent(event);
-    setShowEventModal(false);
+    const newSelected = new Set(selectedEvents);
+    if (newSelected.has(eventId)) newSelected.delete(eventId);
+    else newSelected.add(eventId);
+    setSelectedEvents(newSelected);
+    // close any open vendor/event modal by clearing modalType
+    setModalType(null);
   };
 
   const handleLoad = () => {
@@ -221,6 +228,204 @@ const AllModal = ({
       setSelectAll(true);
     }
   };
+
+  // Helper function to render dropdown button (always enabled)
+  const renderDropdownButton = (
+    type,
+    label,
+    availableItems,
+    selectedItems,
+    onClick,
+    defaultText = null,
+  ) => {
+    let buttonText;
+    if (type === "vendor") {
+      if (availableItems.length === 0) buttonText = "CTC Market";
+      else if (selectedItems.size === 1)
+        buttonText =
+          availableItems.find((v) => v.id === [...selectedItems][0])?.name ||
+          "Unknown Vendor";
+      else buttonText = `${selectedItems.size} selected`;
+    } else if (type === "event") {
+      // selectedItems for events is a Set of selected event ids
+      if (!selectedItems || selectedItems.size === 0)
+        buttonText = defaultText || "Select Event";
+      else if (selectedItems.size === 1) {
+        const selId = [...selectedItems][0];
+        buttonText =
+          availableItems.find((e) => e.id === selId)?.name || "Select Event";
+      } else buttonText = `${selectedItems.size} selected`;
+    } else {
+      buttonText = "Select";
+    }
+
+    return (
+      <div className="vendor-dropdown-container" onClick={onClick}>
+        <span className={`${type}-label`}>{label} </span>
+        <span className="vendor-button-text">{buttonText}</span>
+      </div>
+    );
+  };
+
+  const handleOverlayClick = (e) => {
+    // only close when clicking the overlay itself (not inner content)
+    if (e.target === e.currentTarget) {
+      setModalType(null);
+      if (onClose) onClose();
+    }
+  };
+
+  const handleDelete = () => {
+    if (!onDelete) return;
+    const selectedItemsArray = items.filter((item) =>
+      selectedItems.has(keyExtractor(item)),
+    );
+    onDelete(selectedItemsArray);
+    setSelectedItems(new Set());
+    setSelectAll(false);
+  };
+
+  // Reusable dropdown content for vendor/event modals
+  const DropdownContent = ({ type }) => {
+    const isEventType = type === "event";
+    const list = isEventType ? availableEvents : availableVendors;
+    const tempSelected = isEventType
+      ? tempSelectedEventIds
+      : tempSelectedVendors;
+    const setTemp = isEventType
+      ? setTempSelectedEventIds
+      : setTempSelectedVendors;
+
+    const allSelected =
+      list &&
+      tempSelected &&
+      list.length > 0 &&
+      tempSelected.size === list.length;
+
+    const sorted = (list || [])
+      .slice()
+      .sort((a, b) =>
+        isEventType
+          ? b.start.localeCompare(a.start)
+          : b.name.localeCompare(a.name),
+      );
+
+    return (
+      <div className="vendor-dropdown" onClick={() => setModalType(null)}>
+        <div
+          className="vendor-dropdown-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button className="modal-close" onClick={() => setModalType(null)}>
+            &times;
+          </button>
+          <h3>{isEventType ? "Select Event" : "Select Vendors"}</h3>
+
+          <label
+            className={`${type}-select-all`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={() => {
+                if (allSelected) setTemp(new Set());
+                else setTemp(new Set(list.map((v) => v.id)));
+              }}
+            />
+            <span>
+              {tempSelected && tempSelected.size > 0
+                ? "Deselect All"
+                : "Select All"}
+            </span>
+          </label>
+
+          <div
+            className={isEventType ? "event-grid" : "vendor-grid"}
+            style={{
+              gridTemplateColumns: `repeat(${Math.max(1, Math.ceil(list.length / 5))}, 1fr)`,
+              gridAutoFlow: "column",
+            }}
+          >
+            {sorted.map((item) => (
+              <div
+                key={item.id}
+                className={isEventType ? "event-item" : "vendor-item"}
+              >
+                <label
+                  className={
+                    isEventType
+                      ? "event-label-container"
+                      : "vendor-label-container"
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={tempSelected.has(item.id)}
+                    onChange={() => {
+                      setTemp((prev) => {
+                        const copy = new Set(prev);
+                        if (copy.has(item.id)) copy.delete(item.id);
+                        else copy.add(item.id);
+                        return copy;
+                      });
+                    }}
+                    className={
+                      isEventType ? "event-checkbox" : "vendor-checkbox"
+                    }
+                  />
+                  <span
+                    className={isEventType ? "event-label" : "vendor-label"}
+                  >
+                    {item.name}
+                  </span>
+                </label>
+              </div>
+            ))}
+          </div>
+
+          <div className="vendor-modal-actions">
+            <button
+              className="cancel-button"
+              onClick={() => setModalType(null)}
+            >
+              Cancel
+            </button>
+            <button
+              className="load-button"
+              onClick={() => {
+                if (isEventType) {
+                  setSelectedEvents(new Set(tempSelectedEventIds));
+                } else {
+                  setSelectedVendors(new Set(tempSelectedVendors));
+                }
+                setModalType(null);
+              }}
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Compute a short display string for selected events (used near the buttons)
+  const selectedEventDisplay = (() => {
+    if (!selectedEvents || selectedEvents.size === 0) return null;
+    if (selectedEvents.size === 1) {
+      const selId = [...selectedEvents][0];
+      const sel = availableEvents.find((e) => e.id === selId);
+      if (sel)
+        return `${new Date(sel.start).toLocaleDateString()} - ${new Date(sel.end).toLocaleDateString()}`;
+    }
+    return `${selectedEvents.size} selected`;
+  })();
 
   if (!isOpen) return null;
 
@@ -265,295 +470,184 @@ const AllModal = ({
 
           {/* Sort Options */}
           <div className="sort-options">
-            <div className="sort-option">
-              <button
-                className="sort-button"
-                onClick={() => handleSortToggle("count")}
-              >
-                Count: {sortOptions.count}
-              </button>
-              <select
-                className="priority-select"
-                value={sortPriorities.count}
-                onChange={(e) => handlePriorityChange("count", e.target.value)}
-              >
-                <option value="N/A">N/A</option>
-                <option
-                  value="1"
-                  disabled={
-                    isPriorityTaken("1") && sortPriorities.count !== "1"
+            <div className="sort-options-center">
+              <div className="sort-option">
+                <button
+                  className="sort-button"
+                  onClick={() => handleSortToggle("count")}
+                >
+                  Count: {sortOptions.count}
+                </button>
+                <select
+                  className="priority-select"
+                  value={sortPriorities.count}
+                  onChange={(e) =>
+                    handlePriorityChange("count", e.target.value)
                   }
                 >
-                  1
-                </option>
-                <option
-                  value="2"
-                  disabled={
-                    isPriorityTaken("2") && sortPriorities.count !== "2"
-                  }
-                >
-                  2
-                </option>
-                <option
-                  value="3"
-                  disabled={
-                    isPriorityTaken("3") && sortPriorities.count !== "3"
-                  }
-                >
-                  3
-                </option>
-              </select>
-            </div>
-
-            <div className="sort-option">
-              <button
-                className="sort-button"
-                onClick={() => handleSortToggle("price")}
-              >
-                Price: {sortOptions.price}
-              </button>
-              <select
-                className="priority-select"
-                value={sortPriorities.price}
-                onChange={(e) => handlePriorityChange("price", e.target.value)}
-              >
-                <option value="N/A">N/A</option>
-                <option
-                  value="1"
-                  disabled={
-                    isPriorityTaken("1") && sortPriorities.price !== "1"
-                  }
-                >
-                  1
-                </option>
-                <option
-                  value="2"
-                  disabled={
-                    isPriorityTaken("2") && sortPriorities.price !== "2"
-                  }
-                >
-                  2
-                </option>
-                <option
-                  value="3"
-                  disabled={
-                    isPriorityTaken("3") && sortPriorities.price !== "3"
-                  }
-                >
-                  3
-                </option>
-              </select>
-            </div>
-
-            <div className="sort-option">
-              <button
-                className="sort-button"
-                onClick={() => handleSortToggle("restock")}
-              >
-                Restock: {sortOptions.restock}
-              </button>
-              <select
-                className="priority-select"
-                value={sortPriorities.restock}
-                onChange={(e) =>
-                  handlePriorityChange("restock", e.target.value)
-                }
-              >
-                <option value="N/A">N/A</option>
-                <option
-                  value="1"
-                  disabled={
-                    isPriorityTaken("1") && sortPriorities.restock !== "1"
-                  }
-                >
-                  1
-                </option>
-                <option
-                  value="2"
-                  disabled={
-                    isPriorityTaken("2") && sortPriorities.restock !== "2"
-                  }
-                >
-                  2
-                </option>
-                <option
-                  value="3"
-                  disabled={
-                    isPriorityTaken("3") && sortPriorities.restock !== "3"
-                  }
-                >
-                  3
-                </option>
-              </select>
-            </div>
-            {/* Vendor/Event Selection */}
-            <div className="vendor-dropdown-container">
-              <span className={isVendor ? "event-label" : "vendor-label"}>
-                {isVendor ? "Event " : "Vendor "}
-              </span>
-              <button
-                className={`vendor-button ${(isVendor ? availableEvents : availableVendors).length <= 1 ? "disabled" : ""}`}
-                onClick={() =>
-                  (isVendor ? availableEvents : availableVendors).length > 1 &&
-                  (isVendor ? setShowEventModal : setShowVendorModal)(true)
-                }
-                disabled={
-                  (isVendor ? availableEvents : availableVendors).length <= 1
-                }
-              >
-                {isVendor
-                  ? selectedEvent
-                    ? selectedEvent.name
-                    : "Current"
-                  : availableVendors.length === 0
-                    ? "CTC Market"
-                    : selectedVendors.size === 1
-                      ? availableVendors.find(
-                          (v) => v.id === [...selectedVendors][0],
-                        )?.name || "Unknown Vendor"
-                      : `${selectedVendors.size} selected`}
-              </button>
-              {isVendor && selectedEvent && (
-                <span className="event-date">
-                  {`${new Date(selectedEvent.start).toLocaleDateString()} - ${new Date(selectedEvent.end).toLocaleDateString()}`}
-                </span>
-              )}
-              {isVendor && !selectedEvent && availableEvents.length === 0 && (
-                <span className="event-date">
-                  {new Date().toLocaleDateString()}
-                </span>
-              )}
-              {(isVendor ? showEventModal : showVendorModal) && (
-                <div
-                  className="vendor-dropdown"
-                  onClick={() =>
-                    (isVendor ? setShowEventModal : setShowVendorModal)(false)
-                  }
-                >
-                  <div
-                    className="vendor-dropdown-content"
-                    onClick={(e) => e.stopPropagation()}
+                  <option value="N/A">N/A</option>
+                  <option
+                    value="1"
+                    disabled={
+                      isPriorityTaken("1") && sortPriorities.count !== "1"
+                    }
                   >
-                    <button
-                      className="modal-close"
-                      onClick={() =>
-                        (isVendor ? setShowEventModal : setShowVendorModal)(
-                          false,
-                        )
-                      }
-                    >
-                      &times;
-                    </button>
-                    <h3>{isVendor ? "Select Event" : "Select Vendors"}</h3>
-                    <div className={isVendor ? "event-grid" : "vendor-grid"}>
-                      {(() => {
-                        const itemsPerColumn = 5;
-                        const sortedItems = (
-                          isVendor ? availableEvents : availableVendors
-                        ).sort((a, b) =>
-                          isVendor
-                            ? b.start.localeCompare(a.start)
-                            : b.name.localeCompare(a.name),
-                        );
-                        const columns = [];
-                        for (
-                          let i = 0;
-                          i < sortedItems.length;
-                          i += itemsPerColumn
-                        ) {
-                          columns.push(
-                            sortedItems.slice(i, i + itemsPerColumn),
-                          );
-                        }
-                        return columns.map((column, colIndex) => (
-                          <div
-                            key={colIndex}
-                            className={
-                              isVendor ? "event-column" : "vendor-column"
-                            }
-                          >
-                            {Array.from(
-                              { length: 5 - column.length },
-                              (_, i) => (
-                                <div
-                                  key={`filler-${colIndex}-${i}`}
-                                  className="filler-item"
-                                ></div>
-                              ),
-                            )}
-                            {column.map((item) => (
-                              <div
-                                key={item.id}
-                                className={
-                                  isVendor ? "event-item" : "vendor-item"
-                                }
-                              >
-                                <label
-                                  className={
-                                    isVendor
-                                      ? "event-label-container"
-                                      : "vendor-label-container"
-                                  }
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={
-                                      isVendor
-                                        ? selectedEvent?.id === item.id
-                                        : selectedVendors.has(item.id)
-                                    }
-                                    onChange={() =>
-                                      isVendor
-                                        ? handleEventToggle(item.id)
-                                        : handleVendorToggle(item.id)
-                                    }
-                                    className={
-                                      isVendor
-                                        ? "event-checkbox"
-                                        : "vendor-checkbox"
-                                    }
-                                  />
-                                  <span
-                                    className={
-                                      isVendor ? "event-label" : "vendor-label"
-                                    }
-                                  >
-                                    {item.name}
-                                  </span>
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                    <div className="vendor-modal-actions">
-                      <button
-                        className="cancel-button"
-                        onClick={() =>
-                          (isVendor ? setShowEventModal : setShowVendorModal)(
-                            false,
-                          )
-                        }
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="load-button"
-                        onClick={() =>
-                          (isVendor ? setShowEventModal : setShowVendorModal)(
-                            false,
-                          )
-                        }
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                    1
+                  </option>
+                  <option
+                    value="2"
+                    disabled={
+                      isPriorityTaken("2") && sortPriorities.count !== "2"
+                    }
+                  >
+                    2
+                  </option>
+                  <option
+                    value="3"
+                    disabled={
+                      isPriorityTaken("3") && sortPriorities.count !== "3"
+                    }
+                  >
+                    3
+                  </option>
+                </select>
+              </div>
+
+              <div className="sort-option">
+                <button
+                  className="sort-button"
+                  onClick={() => handleSortToggle("price")}
+                >
+                  Price: {sortOptions.price}
+                </button>
+                <select
+                  className="priority-select"
+                  value={sortPriorities.price}
+                  onChange={(e) =>
+                    handlePriorityChange("price", e.target.value)
+                  }
+                >
+                  <option value="N/A">N/A</option>
+                  <option
+                    value="1"
+                    disabled={
+                      isPriorityTaken("1") && sortPriorities.price !== "1"
+                    }
+                  >
+                    1
+                  </option>
+                  <option
+                    value="2"
+                    disabled={
+                      isPriorityTaken("2") && sortPriorities.price !== "2"
+                    }
+                  >
+                    2
+                  </option>
+                  <option
+                    value="3"
+                    disabled={
+                      isPriorityTaken("3") && sortPriorities.price !== "3"
+                    }
+                  >
+                    3
+                  </option>
+                </select>
+              </div>
+
+              <div className="sort-option">
+                <button
+                  className="sort-button"
+                  onClick={() => handleSortToggle("restock")}
+                >
+                  Restock: {sortOptions.restock}
+                </button>
+                <select
+                  className="priority-select"
+                  value={sortPriorities.restock}
+                  onChange={(e) =>
+                    handlePriorityChange("restock", e.target.value)
+                  }
+                >
+                  <option value="N/A">N/A</option>
+                  <option
+                    value="1"
+                    disabled={
+                      isPriorityTaken("1") && sortPriorities.restock !== "1"
+                    }
+                  >
+                    1
+                  </option>
+                  <option
+                    value="2"
+                    disabled={
+                      isPriorityTaken("2") && sortPriorities.restock !== "2"
+                    }
+                  >
+                    2
+                  </option>
+                  <option
+                    value="3"
+                    disabled={
+                      isPriorityTaken("3") && sortPriorities.restock !== "3"
+                    }
+                  >
+                    3
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div
+              className={`sort-options-right ${userRole === "admin" ? "admin-layout" : ""}`}
+            >
+              {/* Render both buttons so DOM is stable; hide by auth when not applicable */}
+              <div
+                style={{
+                  display:
+                    userRole === "admin" || userRole === "customer"
+                      ? "flex"
+                      : "none",
+                }}
+              >
+                {renderDropdownButton(
+                  "vendor",
+                  "Vendor",
+                  availableVendors,
+                  selectedVendors,
+                  () => setModalType("vendor"),
+                )}
+              </div>
+              <div
+                style={{
+                  display:
+                    userRole === "admin" || userRole === "vendor"
+                      ? "flex"
+                      : "none",
+                }}
+              >
+                {renderDropdownButton(
+                  "event",
+                  "Event",
+                  availableEvents,
+                  selectedEvents,
+                  () => setModalType("event"),
+                  isVendor ? "Current" : null,
+                )}
+              </div>
+              {selectedEventDisplay && (
+                <span className="event-date">{selectedEventDisplay}</span>
               )}
+              {isVendor &&
+                (!selectedEvents || selectedEvents.size === 0) &&
+                availableEvents.length === 0 && (
+                  <span className="event-date">
+                    {new Date().toLocaleDateString()}
+                  </span>
+                )}
             </div>
           </div>
+          {modalType && <DropdownContent type={modalType} />}
         </div>
 
         {/* Selection Actions Section */}
@@ -595,7 +689,11 @@ const AllModal = ({
                   className="item-checkbox"
                 />
                 <div className="item-content">
-                  {renderProductCard({}, "fallback")}
+                  {renderProductCard({}, "fallback", {
+                    name: productMeta.nameElement({}),
+                    price: productMeta.priceElement({}),
+                    vendors: productMeta.vendorsElement({}),
+                  })}
                 </div>
               </label>
             </div>
@@ -609,7 +707,13 @@ const AllModal = ({
                     onChange={() => handleItemToggle(keyExtractor(item))}
                     className="item-checkbox"
                   />
-                  <div className="item-content">{renderProductCard(item)}</div>
+                  <div className="item-content">
+                    {renderProductCard(item, keyExtractor(item), {
+                      name: productMeta.nameElement(item),
+                      price: productMeta.priceElement(item),
+                      vendors: productMeta.vendorsElement(item),
+                    })}
+                  </div>
                 </label>
               </div>
             ))

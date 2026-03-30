@@ -97,7 +97,7 @@ input[type="checkbox"]:checked {
 
 .item-label {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
   padding-right: 1rem;
@@ -113,6 +113,34 @@ input[type="checkbox"]:checked {
 .item-content {
   flex: 1;
   min-width: 0;
+}
+
+/* Meta block shown alongside the product card when renderProductCard is hidden */
+.item-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 1rem;
+}
+
+.item-meta .product-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-light-primary);
+}
+
+.item-meta .product-price {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-light-secondary);
+}
+
+/* Product vendors list displayed in AllModal items */
+.product-vendors {
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--text-light-secondary);
 }
 
 .no-items {
@@ -159,6 +187,16 @@ input[type="checkbox"]:checked {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+}
+
+/* Vendor/Event dropdown modal action row: keep Cancel & Apply on same row,
+   right-aligned with 20px gap between them. Overrides mobile stacking. */
+.vendor-modal-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
 }
 
 .cancel-button,
@@ -576,9 +614,27 @@ input[type="checkbox"]:checked {
 
 .sort-options {
   display: flex;
-  flex-direction: row;
-  gap: 0.75rem;
+  align-items: flex-start;
   margin-bottom: 1rem;
+}
+
+.sort-options-center {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex: 1;
+}
+
+.sort-options-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.sort-options-right.admin-layout {
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .sort-option {
@@ -609,9 +665,9 @@ input[type="checkbox"]:checked {
 .priority-select {
   padding: 0.5rem;
   border: none;
+  border-left: 2px dotted var(--gray-300);
   background: var(--white);
   font-size: 0.9rem;
-  color: var(--text-light-primary);
   cursor: pointer;
 }
 
@@ -624,19 +680,48 @@ input[type="checkbox"]:checked {
 .vendor-dropdown-container {
   border: 1px solid var(--gray-200);
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vendor-dropdown-container:hover:not(.disabled) {
+  border-color: var(--primary-color);
+  background: var(--gray-50);
+}
+
+.vendor-dropdown-container.disabled {
+  background: var(--gray-100);
+  color: var(--text-light-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.vendor-button-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-light-primary);
+  min-width: 120px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.vendor-dropdown-container.disabled .vendor-button-text {
+  color: var(--text-light-secondary);
 }
 
 .vendor-dropdown {
   position: absolute;
-  left: 100%;
   top: 100%;
-  transform: translate(-100%, 0);
+  right: 0;
   z-index: 1100;
   background: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 400px;
   overflow: visible;
 }
 
@@ -669,6 +754,8 @@ input[type="checkbox"]:checked {
   font-weight: 500;
   color: var(--text-light-primary);
   min-width: 120px;
+  white-space: nowrap;
+  text-align: left;
 }
 
 .vendor-button:hover:not(.disabled) {
@@ -685,24 +772,30 @@ input[type="checkbox"]:checked {
 
 /* Vendor Selection Modal */
 .vendor-grid {
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 10px;
+  display: grid;
+  grid-auto-flow: column !important;
+  gap: 0.5rem; /* row and column gap */
   margin-bottom: 1.5rem;
+  /* Force 5 fixed rows so columns expand to show 5 items (data + fillers) */
+  grid-template-rows: repeat(5, 2.5rem);
 }
 
 .vendor-column {
   display: flex;
-  flex-direction: column-reverse;
-  min-width: 180px;
-  height: 12.5rem;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.spacer-item {
+  /* spacer-item not used when grid-template-rows is set; keep for backward compatibility */
+  height: 2.5rem;
 }
 
 .vendor-item {
   display: flex;
   align-items: center;
   padding: 0.25rem;
-  height: 2.5rem;
+  height: 2.5rem; /* matches grid row height */
 }
 
 .vendor-label-container {
@@ -744,9 +837,10 @@ input[type="checkbox"]:checked {
 
 /* Event styles */
 .event-label {
-  margin-right: 0.5rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-light-primary);
+  padding: 8px 16px;
 }
 
 .event-date {
@@ -756,10 +850,10 @@ input[type="checkbox"]:checked {
 }
 
 .vendor-dropdown .event-grid {
-  display: flex;
-  gap: 1rem;
-  max-height: 300px;
-  overflow-y: auto;
+  display: grid;
+  grid-auto-flow: column !important;
+  gap: 0.5rem;
+  grid-template-rows: repeat(5, 2.5rem);
 }
 
 .event-column {
@@ -897,7 +991,6 @@ input[type="checkbox"]:checked {
 }
 
 .product-card {
-  max-width: 25%;
   flex-shrink: 0;
 }
 
@@ -930,4 +1023,19 @@ input[type="checkbox"]:checked {
 
 .product-name {
   text-align: left;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 720px) {
+  .sort-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .vendor-dropdown-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }
