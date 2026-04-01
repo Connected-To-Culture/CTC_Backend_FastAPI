@@ -5,6 +5,8 @@
 @import "./CustomerHomeScreen.css";
 @import "./VendorSelectionModal.css";
 @import "./DeliveryPickupModal.css";
+@import "./AddToCartModal.css";
+@import "./AllModal.css";
 
 /* Global CSS styles for CTC Market */
 * {
@@ -14,8 +16,18 @@
 body {
   margin: 0;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    "acumin-pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

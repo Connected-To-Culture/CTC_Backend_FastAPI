@@ -1,29 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export const useCart = () => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [cartTotal, setCartTotal] = useState(0);
+
+  // Calculate total whenever cart changes
+  useEffect(() => {
+    const total = cart.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+    setCartTotal(total);
+  }, [cart]);
 
   const addToCart = (item) => {
-    setCartItems(prev => [...prev, item]);
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
+      if (existingItem) {
+        return prevCart.map((cartItem) =>
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem,
+        );
+      } else {
+        return [...prevCart, { ...item, quantity: 1 }];
+      }
+    });
   };
 
-  const removeFromCart = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+  const removeFromCart = (itemId) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== itemId));
+  };
+
+  const updateQuantity = (itemId, quantity) => {
+    if (quantity <= 0) {
+      removeFromCart(itemId);
+      return;
+    }
+
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === itemId ? { ...item, quantity } : item,
+      ),
+    );
   };
 
   const clearCart = () => {
-    setCartItems([]);
+    setCart([]);
   };
 
-  const getTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const getCartItemCount = () => {
+    return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
   return {
-    cartItems,
+    cart,
+    cartTotal,
     addToCart,
     removeFromCart,
+    updateQuantity,
     clearCart,
-    getTotal,
+    getCartItemCount,
   };
 };

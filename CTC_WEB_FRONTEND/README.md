@@ -43,244 +43,104 @@ This React application provides a web interface for the CTC Market platform. Use
 ```
 CTC_WEB_FRONTEND/
 ├── public/
-│   └── index.html
+# CTC Web Frontend
+
+This directory contains the web frontend components for the CTC Market App, built with React.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Implemented Features](#implemented-features)
+- [Installation and Build](#installation-and-build)
+- [Usage & Behavior Notes](#usage--behavior-notes)
+- [Project Structure](#project-structure)
+- [Planned Work](#planned-work)
+- [UI Specifications](#ui-specifications)
+
+## Overview
+
+This folder contains the React-based web frontend for the CTC Market platform (vendor/event/product browsing, admin flows, and customer shopping experience).
+
+## Implemented Features (selected)
+
+The README has been updated to reflect features implemented in the current branch. Key items implemented include:
+
+- Dropdowns & selection modals (see `src/modals/AllModal.jsx`):
+  - Reusable dropdown content extracted and used for both vendor and event selection.
+  - Both dropdown buttons remain in the DOM; visibility is controlled by `userRole` (admin/customer/vendor).
+  - Select All / Deselect All checkbox included in both dropdowns.
+  - Modal-local temporary selection (`tempSelectedVendors`, `tempSelectedEventIds`) so multiple choices can be made and only committed when `Apply` is clicked.
+  - Overlay click closes dropdown; `Apply` and `Cancel` buttons behave as expected.
+- UI behavior and styles (see `src/styles/AllModal.css`):
+  - Dropdown grids force 5 fixed rows per column (`grid-template-rows: repeat(5, ...)`) to remove vertical scrollbars and maintain consistent column heights.
+  - Right-aligned `Cancel` / `Apply` actions with 20px gap.
+  - Fallbacks when data is missing: default vendor (`CTC Market`) and default event (`DC Farmers Market (Summer 2026)`).
+- Product card and metadata handling:
+  - New `useProductMeta` hook centralizes product name, price/unit formatting, and vendor list generation with sensible fallbacks.
+  - `useProductCard` supports `hideNameAndPrice` and accepts injected `metaElements` so `AllModal` renders name/price/vendors outside of the internal card layout (keeps card layout consistent across contexts).
+
+Files with notable changes: `src/modals/AllModal.jsx`, `src/styles/AllModal.css`, `src/hooks/useProductCard.js`, `src/hooks/useProductMeta.js`.
+
+## Installation and Build
+
+### Prerequisites
+
+- Node.js (version 14 or higher)
+- npm (comes with Node.js) or yarn
+
+### Installation Steps
+
+1. Ensure Node.js and npm are installed on your system.
+2. Clone the repository: `git clone <repository-url>`
+3. Navigate to the CTC_WEB_FRONTEND directory: `cd CTC_WEB_FRONTEND`
+4. Install dependencies: `npm install`
+
+### Build and Run
+
+- **Development**: Run `npm start` to start the development server. If port 3000 is already in use, the dev server will prompt to run on another port (e.g., 3002).
+- **Production Build**: Run `npm run build` to create an optimized production build in the `build` folder.
+- **Testing**: Run `npm test` to execute the test suite.
+
+## Usage & Behavior Notes
+
+- Vendor/Event selection: use the dropdown buttons in the top-right of the modal (visibility depends on signed-in role). The dropdowns support multi-selection with a "Select All" checkbox and require pressing `Apply` to commit selections.
+- Fallbacks: when vendor or event lists are empty, the UI shows `CTC Market` (vendor) and `DC Farmers Market (Summer 2026)` (event) as sensible defaults.
+- Product cards in the All modal: the internal `renderProductCard` hides name/price/unit for a compact card display; `AllModal` injects product meta (name / price/unit / vendors) to the right of the item count using `useProductMeta`.
+
+## Project Structure
+
+```
+
+CTC_WEB_FRONTEND/
+├── public/
+│ └── index.html
 ├── src/
-│   ├── components/
-│   ├── screens/
-│   ├── context/
-│   ├── hooks/
-│   ├── modals/
-│   ├── styles/
-│   └── utils/
+│ ├── components/
+│ ├── screens/
+│ ├── context/
+│ ├── hooks/ # contains useProductCard, useProductMeta, etc.
+│ ├── modals/ # AllModal and related modal content
+│ ├── styles/ # AllModal.css and other styles
+│ └── utils/
 ├── package.json
 └── README.md
+
 ```
+
+## Planned Work (remaining / future)
+
+The following features are still planned and described here for visibility:
+
+- Home Section Administration (admin UI for toggling home sections, banner management, persistence in DB).
+- Product card Add-to-Cart overlay improvements (accessibility and sizing tests).
+- Full user authentication flows, email notifications, and vendor approval/management workflows.
+- Additional polishing: keyboard accessibility, ARIA labels, and UX tweaks across modals.
+
+If you'd like, I can update this README to add a short changelog with dates and commit references for the items above.
 
 ## UI Specifications
 
-### General Guidelines
-
-- Each modal will have a close button on the top right, as well as closing when clicking the cancel button or when clicking off modal.
-- Use [https://www.connectedtoculture.org/](https://www.connectedtoculture.org/) footer as this is an extension of the site for all pages.
-
-### Home Screen
-
-#### Header
-
-- Logo + text: "CTCMarket" acts as home link
-- 4 links: SHOP, VENDORS, ABOUT, EVENTS
-- Notification icon/button (available when logged in) + Log In button → links to login screen
-- When logged in, there will be a cart icon to the left of the notification icon, links to cart page
-
-#### Body
-
-##### Active Event Section
-
-- Card displays active event
-- Image covers card
-- Text: event name, event title, brief description (2 lines then ellipsis...)
-- Below: event hours + "More Info" button
-- Clicking "More Info" links to the active event in the events page
-- Event address below hours
-
-##### Fresh Products Section
-
-- Text: "Fresh Products" with nav arrows ← →
-- 5 cards
-- Card structure: image of product, name below, price range (min - max across vendors) / unit
-- On page load, creates array for display, sorts by highest inventory
-- Nav arrows cycle through 5 at a time
-
-##### Bakery & Artisan Goods Section
-
-- Text: "Bakery & Artisan goods" with nav arrows ← →
-- 5 cards (same structure as Fresh Products)
-- On page load, all non-produce goods here, sorted alphabetically
-
-##### Site Services Section
-
-- Text: "Site Services"
-- Displays as cards, populates as modal when clicked (hidden by default)
-- Include close button, ESC, and off-clicking for closure
-- Utilities: map of event, highlights stalls, bathrooms, parking
-- Other services: free ingredient cooking stalls, 3rd party affiliates such as food trucks, etc.
-
-##### Subscription Prompt Section
-
-- Input field for email + submit button: "Subscribe"
-
-#### Home Screen (Admin and Vendor)
-
-- Shop button now reads "Inventory"
-
-### Login Screen
-
-#### Header
-
-- Not visible
-
-#### Body
-
-- Centered
-- Logo: CTC Market
-- Card with image of active event (use [] to source active events for rotation)
-- Input fields: Email, Password
-- Submit button: "Log In"
-- Below card: "Not Registered Yet? Sign Up" button links to account creation page (reuse from mobile)
-
-#### Footer
-
-- Not visible
-
-### Events Page
-
-#### Customer / Not Logged In / Vendor View
-
-##### Header
-
-- Visible, "EVENTS" link underlined to display active page
-
-##### Body
-
-- Events listed in chronological order, starting with active event
-- Card structure:
-  - Event title
-  - Event image (possible multiple cycling, establish main one for site use)
-  - No text on image
-  - Below image: event duration and hours, location, description (paragraph)
-- Cards listed vertically, no nav buttons
-
-##### Active Event Section
-
-- Text: "Active Event" (changes based on proximity/border detect logic: previous, active, future event)
-- "See Previous Events" button loads older events, turns into nav for up/down cycling 5 at a time
-- This section stays pinned below header
-
-##### Event Cards Section
-
-- Lists event cards
-
-##### All Events Section
-
-- Centered text: "All Events"
-- Button unhides modal listing events by date
-- Allows multiple selected events with checkboxes, load button
-- Button at top selects/unselects all
-
-#### Admin Only Features
-
-##### Header
-
-- Next to "All Events" button, "Create Event" button now unhidden
-
-##### Events Modal
-
-- If clicking "Create": title "Create New Event"
-- If clicking "Edit": title "Edit Event" (loads existing info)
-- Fields:
-  - Event name
-  - Upload image
-  - Calendar selection for start/end date
-  - Hours of operation: checkboxes for days (Mon-Sun), 2 inputs per day (AM/PM toggle)
-  - Event location: street, city, state, zip
-  - Event description (first 50 chars appear on highlight)
-- Bottom right: "Finalize Event" button
-- Bottom left: "Cancel" button (doesn't erase loaded info for edit)
-
-##### Event Cards (Admin)
-
-- Each card has "Edit Event" button (bottom right of image)
-- "Delete" button (top right of image) brings confirmation modal
-
-##### Delete Modal
-
-- Lists event name and dates for selected events
-
-##### All Events Modal (Admin)
-
-- Has "Delete" button next to "Load" button, prompts confirmation
-
-#### Vendor Only Features
-
-##### Event Cards (Vendor)
-
-- Each card has "Set Up Shop" / "Withdraw Shop" button (bottom right of image)
-- Button disabled after cutoff period, reads "Event is in preparations"
-- After cutoff, if signed up: "Participating"
-- For closed events: "Event is over" or "View Event History" (links to inventory page)
-
-- When clicking "Sign Up" before deadline: adds to admin approval, button reads "Sign Up Pending" until approved, then "Signed Up"
-
-### Vendors Page
-
-#### Customer and Not Logged In
-
-##### Header
-
-- Pinned below other header: "All Vendors" button
-
-##### All Vendors Modal
-
-- Similar to events modal, lists vendors alphabetically
-- Next to vendors: list of participated events
-
-##### Body
-
-- Lists vendors participating in active/upcoming event
-- Card structure:
-  - Title: vendor name (link to web page)
-  - Image
-  - List of participated events
-  - Description
-
-#### Vendor View
-
-- Lists their card at top with "Edit" button (bottom right of image)
-- Then lists other participating vendors (their card excluded)
-- In "All Vendors" modal, their card greyed out, checkbox disabled
-
-#### Admin Only Features
-
-- "All Vendors" has "Delete" button like events
-- Each vendor card has "Edit" (bottom right) and "Delete" (top right) buttons
-- Edit/Delete sends notification/email to vendor
-- Delete confirmation modal lists vendor(s) and events, input field for reason (sent to email)
-- Next to each vendor: "Ban/Unban" button unhides modal
-- Ban modal: calendar date selection, confirmation lists vendor and events until date
-- Ban prevents sign-up for events before ban date
-
-### Shop Page
-
-#### Not Logged In
-
-- Redirects to login page
-
-#### Customer View
-
-##### Header
-
-- Search bar pinned below header
-- Auto-fill based on active event inventory (greyed out if zero stock)
-
-##### Body
-
-- Item cards listed alphabetically, 5 across, unlimited down
-- Zero stock items greyed out and disabled
-- Search supports multiple items with commas
-
-##### Add to Cart Modal
-
-- Title: "Add to Cart"
-- Lists each vendor selling the item: vendor name, item name, unit + amount - price per unit, total, in stock left
-- Out of stock vendors greyed out, buttons disabled
-- Cancel and "Add to Cart" buttons
-
-#### Vendor View (Shop / Inventory)
-
-##### Header
-
-- Search bar
-- "Select Event", "Add Stock", "Import Stock CSV"
+See the `src/styles` folder for current CSS. The README focuses on developer-facing notes; UI design specs remain in the project docs and should be updated as visual changes are made.
 
 ##### Select Event
 
@@ -407,7 +267,7 @@ toggle: card government assitance
 subtitle: if you are using a snap, ebt, wic, or another source of goverment assitance, please select Government assitance
 
 feilds:
-name of card holder  
+name of card holder
 card number
 security code
 zip code -> hidden unless required by the card type based upon the fields above
@@ -519,6 +379,11 @@ Visit the DC WIC website: https://www.dcwic.org for WIC vendor resources.
 Contact D.C. SNAP Retailer Services: https://www.dchealth.dc.gov/service/snap for SNAP application details.
 Confirm POS system is compatible with both eWIC and SNAP EBT.
 
+## CSS Reference
+
+For detailed CSS styling guidelines and conversion of CTC Market website styles to CSS equivalents, see [CSS_REFERENCE_CTC_ORG.md](CSS_REFERENCE_CTC_ORG.md).
+
 ## Contributing
 
 Please refer to the main project repository for contribution guidelines.
+```

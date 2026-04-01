@@ -1,12 +1,12 @@
 import React from "react";
+import "../styles/ToggleSwitch.css";
 
-const ToggleSwitch = ({ options, activeOption, onChange, className = "" }) => {
+const ToggleSwitch = ({ options, activeOption, onChange }) => {
   return (
-    <div className={`toggle-switch ${className}`}>
+    <div className="toggle-switch">
       {options.map((option) => (
         <button
           key={option.value}
-          type="button"
           className={`toggle-option ${activeOption === option.value ? "active" : ""}`}
           onClick={() => onChange(option.value)}
         >

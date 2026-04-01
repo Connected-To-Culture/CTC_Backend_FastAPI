@@ -1,53 +1,149 @@
-/* Login Screen Styles */
+/* LoginScreen Component Styles */
 
 .login-container {
-  min-height: 60vh;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-light);
+  padding: 2rem;
+}
+
+.login-form-wrapper {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  padding: 3rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-light-primary);
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-family: "acumin-pro", sans-serif;
+}
+
+.login-subtitle {
+  font-size: 1rem;
+  color: var(--text-light-secondary);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-form {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 2rem 1rem;
+  gap: 1.5rem;
 }
 
-.login-container .card-header {
-  border-bottom: none;
-  padding: 1rem 1.5rem;
-  background-color: transparent;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-light-primary);
+}
+
+.form-field-solid {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  padding: 0.75rem;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  font-family: "acumin-pro", sans-serif;
+}
+
+.form-field-solid:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(109, 236, 19, 0.2);
+}
+
+.btn-primary-solid {
+  background-color: var(--primary-color);
+  color: var(--background-dark);
   border: none;
   border-radius: 0;
-  margin-bottom: 0;
-}
-
-.login-container .card-body {
-  padding: 1.5rem;
-  background-color: transparent;
-  border: none;
-  border-radius: 0;
-  margin-bottom: 1rem;
-}
-
-/* Transparent input backgrounds on login screen */
-.login-container .form-control {
-  background-color: transparent;
-}
-
-/* Card slogan styles */
-.card-slogan {
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--text-light-secondary);
-  margin: 0.5rem 0 0 0;
-  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "acumin-pro", sans-serif;
+  width: 100%;
 }
 
-/* Toggle Container Styles */
-.login-toggle-container {
-  max-width: 400px;
+.btn-primary-solid:hover {
+  cursor: pointer;
 }
 
-.toggle-label {
+.btn-primary-solid:active {
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3);
+  transform: scale(0.98);
+}
+
+.btn-primary-solid:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 0.75rem;
+  border-radius: 0;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.login-footer p {
   font-size: 0.875rem;
   color: var(--text-light-secondary);
-  margin: 0 0 0 0;
-  text-align: left;
+  margin: 0;
+}
+
+.login-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
   font-weight: 500;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1rem;
+  }
+
+  .login-form-wrapper {
+    padding: 2rem;
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+  }
 }
