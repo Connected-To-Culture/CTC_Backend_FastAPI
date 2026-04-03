@@ -1,69 +1,59 @@
-import React, { useState } from "react";
+import React from "react";
+import "../styles/DeliveryPickupModal.css";
 
-const DeliveryPickupModal = ({ visible, onClose, onSelect }) => {
-  const [selectedOption, setSelectedOption] = useState("delivery");
-  const [pickupTime, setPickupTime] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
+const DeliveryPickupModal = ({ isOpen, onClose, onSelectOption }) => {
+  if (!isOpen) return null;
 
-  if (!visible) return null;
-
-  const handleConfirm = () => {
-    onSelect({
-      type: selectedOption,
-      time: selectedOption === "pickup" ? pickupTime : deliveryTime,
-    });
-    onClose();
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      onClose();
+    }
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   return (
-    <div className="modal">
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content">
-        <div className="modal-header">
-          <h2 className="modal-title">Select Delivery Option</h2>
-        </div>
-
-        <div className="modal-body">
-          <div
-            className={`option ${selectedOption === "delivery" ? "selected" : ""}`}
-            onClick={() => setSelectedOption("delivery")}
+        <button className="modal-close" onClick={onClose}>
+          &times;
+        </button>
+        <h2>Choose Delivery Option</h2>
+        <div className="modal-options">
+          <button
+            className="option-button delivery"
+            onClick={() => onSelectOption("delivery")}
           >
-            <span>Delivery</span>
-          </div>
-
-          <div
-            className={`option ${selectedOption === "pickup" ? "selected" : ""}`}
-            onClick={() => setSelectedOption("pickup")}
-          >
-            <span>In-Store Pickup</span>
-          </div>
-
-          {selectedOption === "pickup" && (
-            <input
-              className="form-control"
-              type="text"
-              placeholder="Pickup Time (e.g., 2:00 PM)"
-              value={pickupTime}
-              onChange={(e) => setPickupTime(e.target.value)}
-            />
-          )}
-
-          {selectedOption === "delivery" && (
-            <input
-              className="form-control"
-              type="text"
-              placeholder="Delivery Time (e.g., 3:00 PM)"
-              value={deliveryTime}
-              onChange={(e) => setDeliveryTime(e.target.value)}
-            />
-          )}
-        </div>
-
-        <div className="modal-footer gap-2">
-          <button className="btn btn-primary" onClick={handleConfirm}>
-            Confirm
+            <div className="option-icon">🚚</div>
+            <div className="option-text">
+              <h3>Delivery</h3>
+              <p>Get your order delivered to your door</p>
+            </div>
           </button>
-          <button className="btn btn-secondary" onClick={onClose}>
-            Cancel
+          <button
+            className="option-button pickup"
+            onClick={() => onSelectOption("pickup")}
+          >
+            <div className="option-icon">🏪</div>
+            <div className="option-text">
+              <h3>Pickup</h3>
+              <p>Pick up your order at the market</p>
+            </div>
           </button>
         </div>
       </div>
