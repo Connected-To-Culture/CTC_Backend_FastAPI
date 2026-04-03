@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from datetime import datetime
 from typing import Optional, List
 
@@ -36,50 +36,65 @@ class FarmersMarketEventUpdate(BaseModel):
 
 
 class ProductBase(BaseModel):
-        name: str
-        #vendor_id: int
-        description: Optional[str] = None
-        price_per_unit: float
-        unit: str #-- kg, piece, bunch
-        category: str #-- vegetables, fruits, dairy, etc.
+    name: str
+    #vendor_id: int
+    description: Optional[str] = None
+    price_per_unit: float
+    unit: str #-- kg, piece, bunch
+    category: str #-- vegetables, fruits, dairy, etc.
 
 class ProductCreate(ProductBase):
-        pass
-
+    pass
 
 class Product(ProductBase):
-        id: int
-        created_at: datetime
-        updated_at: Optional[datetime] = None
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
-        class Config:
-            from_attributes = True
+    class Config:
+        from_attributes = True
 
 
 
 class ProductUpdate(BaseModel):
-        name: Optional[str] = None
-        #vendor_id: int
-        description: Optional[str] = None
-        price_per_unit: Optional[float] = None
-        unit: Optional[str] = None #-- kg, piece, bunch
-        category: Optional[str] = None
+    name: Optional[str] = None
+    #vendor_id: int
+    description: Optional[str] = None
+    price_per_unit: Optional[float] = None
+    unit: Optional[str] = None #-- kg, piece, bunch
+    category: Optional[str] = None
 
-        class Config:
-            from_attributes = True
+    class Config:
+        from_attributes = True
 
 
 class UserBase(BaseModel):
-        username: str
-        email: str
-        full_name: Optional[str] = None
-        password: str
-        role: str  # vendor, customer, admin
+    email: EmailStr
+    full_name: str
+    password: str
+    role: str  # vendor, customer, admin
+
+class UserCreate(UserBase):
+    pass
 
 class User(UserBase):
-        id: int
-        created_at: Optional[datetime]  = None
-        updated_at: Optional[datetime] = None
+    id: int
+    created_at: Optional[datetime]  = None
+    updated_at: Optional[datetime] = None
 
-        class Config:
-            from_attributes = True
+    class Config:
+        from_attributes = True
+
+class UserLogin(BaseModel) :
+  email : EmailStr
+  password : str
+
+
+class Token(BaseModel) :
+  access_token : str
+  token_type: str
+
+class TokenData(BaseModel) : 
+  id : int
+
+
