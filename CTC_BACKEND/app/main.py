@@ -7,7 +7,7 @@ from typing import List
 from app import schemas
 #from app.schemas import ProductBase, Product  , UserBase, User
 
-from app.routers import admin, vendor
+from app.routers import admin, vendor,product,user,auth
 
 import psycopg2
 from psycopg2.extras import  RealDictCursor;
@@ -22,27 +22,12 @@ models.Base.metadata.create_all(bind= engine)
 
 app = FastAPI()
 
-while True:
-    try:
-          connection = psycopg2.connect(
-          host="localhost",
-          database="CTC_Market",
-          user="postgres",
-          password="postgres",
-          port="5432",
-          cursor_factory=RealDictCursor
-           )
-          print("Connection to PostgreSQL database successful")
-          cursor = connection.cursor()
-          break
-          
-    except psycopg2.Error as error:
-        print(f"Error while connecting to PostgreSQL: {error}")
-        time.sleep(5)  # Wait for 5 seconds before retrying
-
 
 app.include_router(admin.router)
 app.include_router(vendor.router)
+app.include_router(product.router)
+app.include_router(user.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def read_root():
