@@ -4,6 +4,7 @@ import LoginScreen from "./screens/LoginScreen";
 import SignUpScreen from "./screens/SignUpScreen";
 import ShopScreen from "./screens/ShopScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ProductsContextProvider } from "./context/ProductsContext";
 import { useCart } from "./hooks/useCart";
 import Header from "./components/Header";
 
@@ -79,7 +80,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <AuthProvider>
+      <ProductsContextProvider>
       <AppContent />
+      </ProductsContextProvider>
     </AuthProvider>
   );
 };

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState,useEffect,useContext } from "react";
 import { useAuth } from "../context/AuthContext";
 import AddToCartModal from "../modals/AddToCartModal";
 import useProductCard from "../hooks/useProductCard";
 import "../styles/CustomerHomeScreen.css";
-import ProductList from "../apis/ProductList";
+import ProductList from "../apis/ProductsList";
+import { ProductsContext } from "../context/ProductsContext";
 
 const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
   const { user, sectionVisibility, toggleSectionVisibility } = useAuth();
@@ -12,19 +13,22 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
   const [isAddToCartModalOpen, setIsAddToCartModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const { products, setProducts } = useState([]);
+  //const { products, setProducts } = useState([]);
+  const { products, setProducts } = useContext(ProductsContext);
  
   useEffect(()=> {
     const FetchData = async() => {
       try{
         const response = await ProductList.get("/");
-        console.log(response.data);
-        //setProducts(response.data.data.products);
+        //console.log(response.data);
+        setProducts(response.data);
           }catch(err){ }
     }
       FetchData();  
 
   },[]);
+
+  console.log("Products in Home Screen:", products);
 
 
   // TODO: Replace with actual event data from API/backend
@@ -131,6 +135,8 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
         <div className="products-grid">
           {products.map((product, index) =>
             renderProductCard(product, `${sectionId}-${index}`),
+            //specific product is not  being fetched here <--- we need to look into this
+            console.log("Rendering product card for:", products)
           )}
         </div>
       </div>
