@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import AddToCartModal from "../modals/AddToCartModal";
 import useProductCard from "../hooks/useProductCard";
 import "../styles/CustomerHomeScreen.css";
+import ProductList from "../apis/ProductList";
 
 const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
   const { user, sectionVisibility, toggleSectionVisibility } = useAuth();
@@ -10,6 +11,21 @@ const CustomerHomeScreen = ({ onSwitchToLogin, setCurrentScreen }) => {
   // Modal state
   const [isAddToCartModalOpen, setIsAddToCartModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const { products, setProducts } = useState([]);
+ 
+  useEffect(()=> {
+    const FetchData = async() => {
+      try{
+        const response = await ProductList.get("/");
+        console.log(response.data);
+        //setProducts(response.data.data.products);
+          }catch(err){ }
+    }
+      FetchData();  
+
+  },[]);
+
 
   // TODO: Replace with actual event data from API/backend
   const activeEvent = null; // This will eventually come from props or API call
